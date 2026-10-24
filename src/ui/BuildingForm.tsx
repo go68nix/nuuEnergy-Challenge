@@ -218,7 +218,7 @@ export const BuildingForm = ({ onSubmitBuilding, onPhotosChange }: Props) => {
         </div>
         <LocationMapPreview
           address={publicData.formattedAddress ?? publicData.city ?? locationInput}
-          coordinates={publicData.coordinates ?? publicData.geometry?.coordinates}
+          coordinates={publicData.coordinates}
         />
         <div className="lp-grid">
           <div className="lp-item">
