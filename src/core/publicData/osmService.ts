@@ -73,14 +73,17 @@ export const resolveBuildingGeometry = async (
       })
       clearTimeout(timeoutId)
       if (res.ok) {
-        const json = await res.json() as Array<{ boundingbox?: string[]; type?: string }>
+        const json = await res.json() as Array<{ boundingbox?: string[]; lat?: string; lon?: string; type?: string }>
         if (json.length > 0 && json[0].boundingbox) {
+          const latitude = Number(json[0].lat)
+          const longitude = Number(json[0].lon)
           const [latMin, latMax, lonMin, lonMax] = json[0].boundingbox.map(Number)
           const dLatMeters = Math.abs(latMax - latMin) * 111320
           const dLonMeters = Math.abs(lonMax - lonMin) * 71000
           const roughArea = Math.round(dLatMeters * dLonMeters)
           if (roughArea >= 35 && roughArea <= 1500) {
             return {
+              coordinates: Number.isFinite(latitude) && Number.isFinite(longitude) ? { lat: latitude, lon: longitude } : undefined,
               footprintM2: roughArea,
               estimatedStories: 2,
               estimatedGrossFloorAreaM2: Math.round(roughArea * 1.6),

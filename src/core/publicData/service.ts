@@ -206,6 +206,7 @@ export const lookupPublicData = async (
       const networkGeometry = await resolveBuildingGeometry(components)
       if (networkGeometry && networkGeometry.source.includes('Nominatim')) {
         syncResult.geometry = networkGeometry
+        syncResult.coordinates = networkGeometry.coordinates
         // Re-run floor area cross-check if applicable
         if (building?.heatedFloorAreaM2 && networkGeometry.estimatedGrossFloorAreaM2) {
           const stated = building.heatedFloorAreaM2

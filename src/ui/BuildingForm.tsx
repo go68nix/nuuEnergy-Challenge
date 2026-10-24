@@ -11,6 +11,7 @@ import { createForegroundMask } from './localHighlightWorker'
 import { createHighlightedPhoto } from './createHighlightedPhoto'
 import { PIPE_DETECTION_CONFIG } from '../core/pipeDetectionConfig'
 import { PipePhotoHelper } from './PipePhotoHelper'
+import { LocationMapPreview } from './LocationMapPreview'
 
 type Props = { onSubmitBuilding: (building: BuildingInput, photos: HeaterPhoto[]) => void; onPhotosChange?: (photos: HeaterPhoto[]) => void }
 type AnswerKey = keyof BuildingInput
@@ -207,6 +208,10 @@ export const BuildingForm = ({ onSubmitBuilding, onPhotosChange }: Props) => {
           <span className="lp-badge">✓ Public Data Found</span>
           <strong>{publicData.formattedAddress ?? publicData.city}</strong>
         </div>
+        <LocationMapPreview
+          address={publicData.formattedAddress ?? publicData.city ?? locationInput}
+          coordinates={publicData.coordinates ?? publicData.geometry?.coordinates}
+        />
         <div className="lp-grid">
           <div className="lp-item">
             <small>DIN EN 12831 Outdoor Temp</small>

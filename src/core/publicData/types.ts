@@ -34,6 +34,7 @@ export type AbMctsBranchResult = {
 }
 
 export type BuildingGeometry = {
+  coordinates?: { lat: number; lon: number }
   footprintM2?: number
   estimatedStories?: number
   estimatedGrossFloorAreaM2?: number
