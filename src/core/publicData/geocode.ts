@@ -14,6 +14,7 @@ export type GeocodedAddress = {
   matchedBuilding: boolean
   postalCode?: string
   city?: string
+  street?: string
   houseNumber?: string
   coordinates: LatLon
   osmUrl: string
@@ -49,6 +50,7 @@ const toGeocodedAddress = (result: NominatimResult): GeocodedAddress => {
     matchedBuilding,
     postalCode: address.postcode,
     city,
+    street: address.road,
     houseNumber: address.house_number,
     coordinates: { lat: Number(result.lat), lon: Number(result.lon) },
     osmUrl: `https://www.openstreetmap.org/${result.osm_type}/${result.osm_id}`,
