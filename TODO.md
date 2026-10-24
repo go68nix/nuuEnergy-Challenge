@@ -1,0 +1,4 @@
+- Photo analysis (not implemented)
+- Radiator assessment module logic (currently stubbed)
+- Traffic light aggregation logic (currently stubbed)
+- Pitch mode for hidden buildings

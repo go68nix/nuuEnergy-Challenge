@@ -1,0 +1,4 @@
+fuelType,annualConsumption,occupants,constructionOrRenovationYear,heatedFloorAreaM2
+gas_m3,1900,3,1994,165
+heating_oil_l,2400,2,1972,190
+gas_kwh,9200,2,2018,110
