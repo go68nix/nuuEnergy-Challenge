@@ -1,0 +1,92 @@
+export type ReportLanguage = 'de' | 'en'
+type LocaleMessage = { text: string; reason?: string }
+type ReportLocale = {
+  title: string; subtitle: string; back: string; viewReport: string; print: string; copy: string; copied: string; language: string
+  sections: Record<'summary' | 'building' | 'findings' | 'missing' | 'grey' | 'checklist' | 'photos', string>
+  labels: Record<string, string>
+  traffic: Record<'green' | 'yellow' | 'red', string>
+  summaryReasons: Record<'green' | 'yellow' | 'red', string[]>
+  findings: Record<'heating' | 'flow' | 'pipe' | 'costs', string>
+  fields: Record<string, string>
+  values: Record<string, string>
+  photoLabels: Record<string, string>
+  evidence: Record<string, string>
+  messages: Record<string, LocaleMessage>
+}
+
+const messages: Record<ReportLanguage, ReportLocale> = {
+  en: {
+    title: 'Technician visit report', subtitle: 'Prepared for the on-site heating system review', back: 'Back to results', viewReport: 'Open technician report', print: 'Print / Save as PDF', copy: 'Copy as text', copied: 'Copied', language: 'Language',
+    sections: { summary: 'Summary', building: 'Building data', findings: 'Findings', missing: 'Missing information', grey: 'Grey areas', checklist: 'On-site checklist', photos: 'Photos' },
+    labels: { preliminary: 'This is a preliminary assessment, not a decision.', nothingFlagged: 'Nothing flagged.', source: 'Source', provided: 'Provided', estimated: 'Estimated', unknown: 'Unknown', high: 'High priority', normal: 'Normal priority', traffic: 'Preliminary traffic light', buildingId: 'Building', date: 'Report date', methodA: 'Consumption method', methodB: 'Area / building-age method', range: 'Combined estimated range', flowTemp: 'Flow temperature class', pipe: 'Pipe type', confidence: 'Confidence', basis: 'Basis', evidence: 'Evidence', currentCost: 'Current system annual cost', heatPumpCost: 'Estimated heat pump annual cost', savings: 'Estimated annual difference', jaz: 'Assumed seasonal performance (JAZ)', costBasis: 'Comparison uses assumed energy prices and seasonal performance.', yearFallback: 'Pipe type remains unknown; the fallback is based on building year {{year}} only.', notAvailable: 'Not available', yes: 'Yes', no: 'No', checkbox: 'Check on site' },
+    traffic: { green: 'Green · promising', yellow: 'Yellow · review needed', red: 'Red · elevated risk' },
+    summaryReasons: { green: ['The provided data shows no major pipe-system or energy-use warning.', 'The technician checks below are still required.'], yellow: ['Some key details are estimated, missing, or need on-site verification.', 'Review the grey areas and complete the checklist before deciding.'], red: ['The available data shows a significant technical or energy-use risk.', 'Resolve the high-priority checks before selecting a system.'] },
+    findings: { heating: 'Heating load estimate', flow: 'Flow temperature', pipe: 'Heating pipe system', costs: 'Operating cost comparison' },
+    fields: { fuel: 'Current energy source', consumption: 'Annual consumption', occupants: 'Occupants', constructionYear: 'Original construction year', floorArea: 'Heated floor area', heatingDistribution: 'Room heating', buildingType: 'Building type', heatingSystem: 'Current heating system', facade: 'Facade insulated', roof: 'Roof insulated', systemAge: 'Heating system age', replacementTiming: 'Replacement timing', winterShare: 'Area heated in winter', pipeSystem: 'Pipe system' },
+    values: { gas_m3: 'Natural gas (m³)', gas_kwh: 'Natural gas (kWh)', heating_oil_l: 'Heating oil (L)', radiator: 'Radiator', underfloor: 'Underfloor heating', mixed: 'Underfloor heating and radiator', single_two_family: 'Single or two family house', apartment: 'Apartment building', end_terrace: 'End-of-terrace house', mid_terrace: 'Terraced house · middle', semi_detached: 'Semi-detached house', gas: 'Gas heating', oil: 'Oil heating', pellet: 'Pellet', gas_condensing: 'Condensing gas boiler', oil_condensing: 'Condensing oil heating', district_other: 'District heating or other', 'two-pipe': 'Two-pipe', 'single-pipe': 'Single-pipe', half: 'About one half', third: 'About one third', quarter: 'About one quarter', other: 'Other', '0_9': '0–9 years', '10_19': '10–19 years', '20_29': '20–29 years', '30_plus': '30+ years', immediately: 'Immediately', '1_3_months': 'In 1 to 3 months', '3_6_months': 'In 3 to 6 months', over_6_months: 'In more than 6 months', not_planned: 'Not currently planned', true: 'Yes', false: 'No', unknown: 'Unknown' },
+    photoLabels: { 'single-pipe': 'Likely single-pipe', 'two-pipe': 'Two-pipe · low risk', 'pipe-unclear': 'Pipe type unclear', 'not-heater': 'Not a heater' },
+    evidence: { 'Bypass piece between the pipes at the radiator': 'Bypass piece between the pipes at the radiator', 'Flow continues through the radiator branch': 'Flow continues through the radiator branch', 'Separate supply and return pipes': 'Separate supply and return pipes', 'Independent flow path to the radiator': 'Independent flow path to the radiator', 'Pipe connections are visible': 'Pipe connections are visible', 'The system type cannot be distinguished clearly': 'The system type cannot be distinguished clearly', 'No recognizable heater or radiator connection': 'No recognizable heater or radiator connection' },
+    messages: {
+      'heating.missingOccupants': { text: 'Occupant count not provided', reason: 'The consumption-based heating load method subtracts an assumed hot-water allowance per occupant.' },
+      'heating.verify': { text: 'Complete a DIN EN 12831 heating-load calculation', reason: 'The consumption and building-area methods are screening estimates, not room-by-room design calculations.' },
+      'heating.disagreement': { text: 'Heating-load methods differ by more than {{percent}}%', reason: 'The consumption estimate and the midpoint of the building-area estimate differ beyond the configured tolerance.' },
+      'cost.assumptions': { text: 'Confirm the operating-cost assumptions', reason: 'The comparison uses assumed energy prices and a default seasonal performance value unless a JAZ was supplied.' },
+      'energy.implausible': { text: 'Check the energy use per heated area', reason: 'The converted annual consumption is outside the configured plausible range of {{min}}–{{max}} kWh/m².' },
+      'pipe.missing': { text: 'Pipe system is not confirmed', reason: 'The pipe type is unknown or was not provided.' },
+      'pipe.estimate': { text: 'Verify the estimated pipe type', reason: 'The pipe classification came from a photo estimate and is not confirmed.' },
+      'pipe.verify': { text: 'Verify the radiator pipe circuit on site', reason: 'Confirm whether supply and return are separate and whether a bypass is present.' },
+      'pipe.yearMismatch': { text: 'Photo estimate differs from the building-year estimate', reason: 'The photo-based pipe type does not match the broad estimate derived from construction year.' },
+      'pipe.photoUnclear': { text: 'Pipe system unclear in the photo', reason: 'The photo result could not distinguish the pipe layout.' },
+      'radiators.missing': { text: 'Radiator assessment not available', reason: 'No radiator sizing or flow-temperature assessment was performed by this tool.' },
+      'technician.roomSizing': { text: 'Check room-by-room sizing and hydraulic balancing', reason: 'Verify emitter output at the planned flow temperature and balance the heating circuit.' },
+      'technician.electrical': { text: 'Check electrical capacity and meter cabinet', reason: 'Confirm the available electrical connection and meter-cabinet capacity for the selected heat pump.' },
+      'technician.location': { text: 'Check outdoor-unit location, noise, and permits', reason: 'Review clearances, neighbor noise exposure, condensate handling, and local permit requirements.' },
+      'system.ageMissing': { text: 'Heating-system age is unknown', reason: 'The system age was not provided or was marked unknown.' },
+      'system.oldBuilding': { text: 'Review heating-system replacement timing', reason: 'The building is at least {{years}} years old and the heating-system age is unknown; building age alone does not establish boiler age.' },
+      'summary.singlePipe': { text: 'A confirmed single-pipe circuit needs a flow-temperature and emitter review.' },
+      'summary.estimatedPipe': { text: 'The pipe type is estimated or unknown, so compatibility needs an on-site check.' },
+      'summary.energy': { text: 'Energy use per heated area is outside the configured screening range.' },
+      'summary.complete': { text: 'No major pipe or energy-use warning was identified from the provided inputs.' },
+    },
+  },
+  de: {
+    title: 'Technikerbericht für den Vor-Ort-Termin', subtitle: 'Vorbereitet für die Prüfung der Heizungsanlage vor Ort', back: 'Zurück zu den Ergebnissen', viewReport: 'Technikerbericht öffnen', print: 'Drucken / als PDF speichern', copy: 'Als Text kopieren', copied: 'Kopiert', language: 'Sprache',
+    sections: { summary: 'Zusammenfassung', building: 'Gebäudedaten', findings: 'Ergebnisse', missing: 'Fehlende Angaben', grey: 'Unsicherheiten', checklist: 'Vor-Ort-Checkliste', photos: 'Fotos' },
+    labels: { preliminary: 'Dies ist eine vorläufige Einschätzung, keine Entscheidung.', nothingFlagged: 'Nichts hervorgehoben.', source: 'Quelle', provided: 'Angegeben', estimated: 'Geschätzt', unknown: 'Unbekannt', high: 'Hohe Priorität', normal: 'Normale Priorität', traffic: 'Vorläufige Ampelbewertung', buildingId: 'Gebäude', date: 'Berichtsdatum', methodA: 'Verbrauchsmethode', methodB: 'Fläche / Gebäudealter', range: 'Kombinierter Schätzbereich', flowTemp: 'Vorlauftemperaturklasse', pipe: 'Rohrsystem', confidence: 'Konfidenz', basis: 'Grundlage', evidence: 'Hinweise', currentCost: 'Jährliche Kosten der aktuellen Anlage', heatPumpCost: 'Geschätzte jährliche Wärmepumpenkosten', savings: 'Geschätzte jährliche Differenz', jaz: 'Angenommene Jahresarbeitszahl (JAZ)', costBasis: 'Vergleich mit angenommenen Energiepreisen und einer angenommenen Jahresarbeitszahl.', yearFallback: 'Rohrsystem unbekannt; Rückfallannahme nur anhand des Baujahrs {{year}}.', notAvailable: 'Nicht verfügbar', yes: 'Ja', no: 'Nein', checkbox: 'Vor Ort prüfen' },
+    traffic: { green: 'Grün · aussichtsreich', yellow: 'Gelb · Prüfung erforderlich', red: 'Rot · erhöhtes Risiko' },
+    summaryReasons: { green: ['Die angegebenen Daten zeigen keine wesentlichen Warnhinweise zum Rohrsystem oder Energieverbrauch.', 'Die nachstehenden Technikerprüfungen sind weiterhin erforderlich.'], yellow: ['Einige wichtige Angaben sind geschätzt, fehlen oder müssen vor Ort geprüft werden.', 'Prüfen Sie die Unsicherheiten und bearbeiten Sie die Checkliste vor einer Entscheidung.'], red: ['Die verfügbaren Daten zeigen ein wesentliches technisches oder energetisches Risiko.', 'Klären Sie die Punkte mit hoher Priorität, bevor Sie ein System auswählen.'] },
+    findings: { heating: 'Heizlastschätzung', flow: 'Vorlauftemperatur', pipe: 'Heizungsrohrsystem', costs: 'Vergleich der Betriebskosten' },
+    fields: { fuel: 'Aktueller Energieträger', consumption: 'Jahresverbrauch', occupants: 'Bewohnerzahl', constructionYear: 'Ursprüngliches Baujahr', floorArea: 'Beheizte Fläche', heatingDistribution: 'Raumheizung', buildingType: 'Gebäudetyp', heatingSystem: 'Aktuelle Heizungsanlage', facade: 'Fassade gedämmt', roof: 'Dach gedämmt', systemAge: 'Alter der Heizungsanlage', replacementTiming: 'Zeitpunkt des Austauschs', winterShare: 'Im Winter beheizter Bereich', pipeSystem: 'Rohrsystem' },
+    values: { gas_m3: 'Erdgas (m³)', gas_kwh: 'Erdgas (kWh)', heating_oil_l: 'Heizöl (L)', radiator: 'Heizkörper', underfloor: 'Fußbodenheizung', mixed: 'Fußbodenheizung und Heizkörper', single_two_family: 'Ein- oder Zweifamilienhaus', apartment: 'Mehrfamilienhaus', end_terrace: 'Reihenendhaus', mid_terrace: 'Reihenmittelhaus', semi_detached: 'Doppelhaushälfte', gas: 'Gasheizung', oil: 'Ölheizung', pellet: 'Pelletheizung', gas_condensing: 'Gas-Brennwertkessel', oil_condensing: 'Öl-Brennwertheizung', district_other: 'Fernwärme oder andere', 'two-pipe': 'Zweirohrsystem', 'single-pipe': 'Einrohrsystem', half: 'Etwa die Hälfte', third: 'Etwa ein Drittel', quarter: 'Etwa ein Viertel', other: 'Andere Fläche', '0_9': '0–9 Jahre', '10_19': '10–19 Jahre', '20_29': '20–29 Jahre', '30_plus': '30+ Jahre', immediately: 'Sofort', '1_3_months': 'In 1 bis 3 Monaten', '3_6_months': 'In 3 bis 6 Monaten', over_6_months: 'In mehr als 6 Monaten', not_planned: 'Derzeit nicht geplant', true: 'Ja', false: 'Nein', unknown: 'Unbekannt' },
+    photoLabels: { 'single-pipe': 'Wahrscheinlich Einrohrsystem', 'two-pipe': 'Zweirohrsystem · niedriges Risiko', 'pipe-unclear': 'Rohrsystem unklar', 'not-heater': 'Kein Heizkörper erkannt' },
+    evidence: { 'Bypass piece between the pipes at the radiator': 'Überbrückungsstück zwischen den Rohren am Heizkörper', 'Flow continues through the radiator branch': 'Der Durchfluss setzt sich im Heizkörperzweig fort', 'Separate supply and return pipes': 'Getrennte Vor- und Rücklaufrohre', 'Independent flow path to the radiator': 'Unabhängiger Durchfluss zum Heizkörper', 'Pipe connections are visible': 'Rohranschlüsse sind sichtbar', 'The system type cannot be distinguished clearly': 'Der Systemtyp ist nicht eindeutig erkennbar', 'No recognizable heater or radiator connection': 'Kein eindeutiger Heizkörper- oder Heizungsanschluss erkennbar' },
+    messages: {
+      'heating.missingOccupants': { text: 'Bewohnerzahl nicht angegeben', reason: 'Die verbrauchsbasierte Heizlastmethode zieht je Bewohner einen angenommenen Warmwasserbedarf ab.' },
+      'heating.verify': { text: 'Heizlastberechnung nach DIN EN 12831 durchführen', reason: 'Die Verbrauchs- und Gebäudeabschätzung ersetzt keine raumweise Auslegungsberechnung.' },
+      'heating.disagreement': { text: 'Die Heizlastmethoden weichen um mehr als {{percent}}% ab', reason: 'Verbrauchsschätzung und Mittelpunkt der Gebäudeabschätzung überschreiten die eingestellte Abweichung.' },
+      'cost.assumptions': { text: 'Annahmen zum Betriebskostenvergleich bestätigen', reason: 'Der Vergleich nutzt angenommene Energiepreise und eine Standard-Jahresarbeitszahl, sofern keine JAZ angegeben wurde.' },
+      'energy.implausible': { text: 'Energieverbrauch je beheizter Fläche prüfen', reason: 'Der umgerechnete Jahresverbrauch liegt außerhalb des eingestellten plausiblen Bereichs von {{min}}–{{max}} kWh/m².' },
+      'pipe.missing': { text: 'Rohrsystem nicht bestätigt', reason: 'Das Rohrsystem ist unbekannt oder wurde nicht angegeben.' },
+      'pipe.estimate': { text: 'Geschätztes Rohrsystem vor Ort prüfen', reason: 'Die Einstufung stammt aus einer Fotoschätzung und ist nicht bestätigt.' },
+      'pipe.verify': { text: 'Heizkörper-Rohrkreis vor Ort prüfen', reason: 'Prüfen Sie, ob Vor- und Rücklauf getrennt sind und ein Bypass vorhanden ist.' },
+      'pipe.yearMismatch': { text: 'Fotoschätzung weicht von der Baujahrschätzung ab', reason: 'Das fotobasierte Rohrsystem stimmt nicht mit der groben Baujahrschätzung überein.' },
+      'pipe.photoUnclear': { text: 'Rohrsystem auf dem Foto unklar', reason: 'Das Foto ermöglicht keine eindeutige Unterscheidung des Rohrverlaufs.' },
+      'radiators.missing': { text: 'Heizkörperbewertung nicht verfügbar', reason: 'Dieses Tool hat keine Heizkörperauslegung oder Vorlauftemperaturprüfung durchgeführt.' },
+      'technician.roomSizing': { text: 'Raumweise Auslegung und hydraulischen Abgleich prüfen', reason: 'Prüfen Sie die Heizkörperleistung bei geplanter Vorlauftemperatur und gleichen Sie den Heizkreis ab.' },
+      'technician.electrical': { text: 'Elektrische Leistung und Zählerschrank prüfen', reason: 'Bestätigen Sie den elektrischen Anschluss und die Kapazität des Zählerschranks für die Wärmepumpe.' },
+      'technician.location': { text: 'Aufstellort, Geräusche und Genehmigungen prüfen', reason: 'Prüfen Sie Abstände, Lärmauswirkung auf Nachbarn, Kondensatführung und Genehmigungspflichten.' },
+      'system.ageMissing': { text: 'Alter der Heizungsanlage unbekannt', reason: 'Das Anlagenalter wurde nicht angegeben oder als unbekannt markiert.' },
+      'system.oldBuilding': { text: 'Austauschzeitpunkt der Heizungsanlage prüfen', reason: 'Das Gebäude ist mindestens {{years}} Jahre alt und das Anlagenalter unbekannt; das Baujahr belegt nicht das Kesselalter.' },
+      'summary.singlePipe': { text: 'Ein bestätigtes Einrohrsystem erfordert eine Prüfung von Vorlauftemperatur und Heizflächen.' },
+      'summary.estimatedPipe': { text: 'Das Rohrsystem ist geschätzt oder unbekannt und muss vor Ort geprüft werden.' },
+      'summary.energy': { text: 'Der Energieverbrauch je beheizter Fläche liegt außerhalb des eingestellten Prüfkorridors.' },
+      'summary.complete': { text: 'Die angegebenen Daten zeigen keine wesentlichen Warnhinweise zum Rohrsystem oder Energieverbrauch.' },
+    },
+  },
+}
+
+export const REPORT_LOCALES = messages
+export type ReportMessages = typeof REPORT_LOCALES.en
+
+export const formatReportTemplate = (template: string, params?: Record<string, string | number>) =>
+  Object.entries(params ?? {}).reduce((text, [key, value]) => text.replaceAll(`{{${key}}}`, String(value)), template)

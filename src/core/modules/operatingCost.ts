@@ -1,4 +1,6 @@
 import type { AssessmentModule, BuildingInput } from '../types'
+import { getImplausibleEnergyUseItem } from '../reportChecks'
+import { makeReportItem } from '../reportItems'
 
 const ELECTRICITY_EUR_PER_KWH = 0.26
 const GAS_EUR_PER_KWH = 0.11
@@ -63,6 +65,7 @@ export const operatingCostModule: AssessmentModule = {
         estimatedHeatPumpCostEur,
         annualSavingsEur,
       },
+      reportItems: [makeReportItem('cost.assumptions', 'uncertain'), getImplausibleEnergyUseItem(building)].filter((item): item is NonNullable<typeof item> => item !== undefined),
     }
   },
 }

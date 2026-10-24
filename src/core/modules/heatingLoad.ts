@@ -1,4 +1,6 @@
 import type { AssessmentModule, BuildingInput } from '../types'
+import { getHeatingLoadDisagreementItem } from '../reportChecks'
+import { makeReportItem } from '../reportItems'
 
 const FULL_LOAD_HOURS = 2000
 const HOT_WATER_KWH_PER_OCCUPANT = 1000
@@ -59,6 +61,11 @@ export const heatingLoadModule: AssessmentModule = {
       baselineMaxWm2 > 75
         ? ['Advice: baseline above 75 W/m², check envelope upgrades before final design.']
         : undefined
+    const reportItems = [
+      makeReportItem('heating.verify', 'verify', 'high'),
+      ...(building.occupants === undefined ? [makeReportItem('heating.missingOccupants', 'missing')] : []),
+      getHeatingLoadDisagreementItem(methodAKw, methodBRangeKw),
+    ].filter((item): item is NonNullable<typeof item> => item !== undefined)
 
     return {
       id: 'heating_load',
@@ -71,6 +78,7 @@ export const heatingLoadModule: AssessmentModule = {
         fullLoadHours: FULL_LOAD_HOURS,
       },
       notes,
+      reportItems,
     }
   },
 }

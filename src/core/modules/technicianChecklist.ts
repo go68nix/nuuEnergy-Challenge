@@ -1,21 +1,25 @@
 import type { AssessmentModule } from '../types'
+import { getBuildingAgeChecks } from '../reportChecks'
+import { makeReportItem } from '../reportItems'
 
 export const technicianChecklistModule: AssessmentModule = {
   id: 'technician_checklist',
   label: 'Technician checklist',
-  run() {
+  run(building) {
     return {
       id: 'technician_checklist',
       label: 'Technician checklist',
       status: 'ok',
       data: {
-        items: [
-          'DIN EN 12831 load calculation',
-          'Room-by-room sizing and hydraulic balancing',
-          'Electrical capacity and Zählerschrank check',
-          'Outdoor unit placement, noise, and permits',
-        ],
+        items: [],
       },
+      reportItems: [
+        makeReportItem('heating.verify', 'verify', 'high'),
+        makeReportItem('technician.roomSizing', 'verify', 'high'),
+        makeReportItem('technician.electrical', 'verify', 'high'),
+        makeReportItem('technician.location', 'verify', 'high'),
+        ...getBuildingAgeChecks(building),
+      ],
     }
   },
 }

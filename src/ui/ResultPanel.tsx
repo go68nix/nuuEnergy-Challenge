@@ -1,30 +1,36 @@
-import type { AssessmentResult, ModuleResult } from '../core/types'
+import type { AssessmentResult } from '../core/types'
 import { answerLabel } from './BuildingForm'
+import { REPORT_LOCALES } from '../core/reportLocales'
+import { buildReport } from '../core/report'
 
 type ResultPanelProps = {
   result: AssessmentResult | null
+  onOpenReport: () => void
 }
 
-const renderData = (data: unknown): string => {
-  if (data === undefined) {
-    return ''
-  }
-
-  return JSON.stringify(data, null, 2)
+const HeatingLoadDiagram = ({ result }: { result: AssessmentResult }) => {
+  const data = result.modules.find(module => module.id === 'heating_load')?.data
+  if (!data || typeof data !== 'object') return null
+  const load = data as { methodAKw?: number; methodBRangeKw?: [number, number]; rangeKw?: [number, number] }
+  const methodA = typeof load.methodAKw === 'number' ? load.methodAKw : undefined
+  const methodB = Array.isArray(load.methodBRangeKw) ? load.methodBRangeKw : undefined
+  if (methodA === undefined && !methodB) return null
+  const max = Math.max(methodA ?? 0, ...(methodB ?? [0]), 1)
+  const width = (value: number) => `${Math.max(2, Math.min(100, value / max * 100))}%`
+  return <div className="load-diagram" aria-label="Heating load estimate comparison">
+    <div className="load-scale"><span>0 kW</span><span>{max.toFixed(1)} kW</span></div>
+    {methodA !== undefined && <div className="load-row"><span>Consumption method</span><div className="load-track"><i style={{ width: width(methodA) }}/></div><strong>{methodA.toFixed(1)} kW</strong></div>}
+    {methodB && <div className="load-row"><span>Building method</span><div className="load-track"><i className="load-range" style={{ left: `${methodB[0] / max * 100}%`, width: `${Math.max(2, (methodB[1] - methodB[0]) / max * 100)}%` }}/></div><strong>{methodB[0].toFixed(1)}–{methodB[1].toFixed(1)} kW</strong></div>}
+    {load.rangeKw && <p>Combined planning range: <strong>{load.rangeKw[0].toFixed(1)}–{load.rangeKw[1].toFixed(1)} kW</strong></p>}
+  </div>
 }
 
-const moduleStatusLabel = (moduleResult: ModuleResult) => {
-  if (moduleResult.status === 'not_implemented') {
-    return 'Not implemented yet'
-  }
-
-  return moduleResult.status
-}
-
-export const ResultPanel = ({ result }: ResultPanelProps) => {
+export const ResultPanel = ({ result, onOpenReport }: ResultPanelProps) => {
   if (!result) return null
+  const report = buildReport(result.building, result, 'en')
   const fuelLabel = result.building.fuelType === 'gas_m3' ? 'Natural gas (m³)' : result.building.fuelType === 'gas_kwh' ? 'Natural gas (kWh)' : 'Heating oil (L)'
   const consumptionUnit = result.building.fuelType === 'gas_m3' ? 'm³ / year' : result.building.fuelType === 'gas_kwh' ? 'kWh / year' : 'L / year'
+  const findings = report.findings.filter(finding => finding.lines.some(line => !line.endsWith('Not available')))
   return (
     <section className="card results-card">
       <div className="result-section"><span className="eyebrow">YOUR HOME REPORT</span><h2>Details you shared</h2><div className="report-grid">
@@ -39,29 +45,15 @@ export const ResultPanel = ({ result }: ResultPanelProps) => {
         <div className="report-item"><small>Heating system age</small><strong>{answerLabel(result.building.heatingSystemAge) ?? '—'}</strong></div>
         <div className="report-item"><small>Replacement timing</small><strong>{answerLabel(result.building.replacementTiming) ?? '—'}</strong></div>
         <div className="report-item"><small>Area heated in winter</small><strong>{answerLabel(result.building.winterHeatedShare) ?? 'Not provided'}</strong></div>
-        {result.building.occupants !== undefined && <div className="report-item"><small>People in home</small><strong>{result.building.occupants}</strong></div>}
       </div></div>
       <div className="result-section"><span className="eyebrow">SUITABILITY CHECK</span><h2>Assessment results</h2>
-        <div className="results">
-          {result.modules.map((moduleResult) => (
-            <article className="module-result" key={moduleResult.id}>
-              <h3>{moduleResult.label}</h3>
-              <p>
-                <strong>Status:</strong> {moduleStatusLabel(moduleResult)}
-              </p>
-              {moduleResult.notes && moduleResult.notes.length > 0 && (
-                <ul>
-                  {moduleResult.notes.map((note) => (
-                    <li key={note}>{note}</li>
-                  ))}
-                </ul>
-              )}
-              {moduleResult.data !== undefined && <pre>{renderData(moduleResult.data)}</pre>}
-              {moduleResult.id === 'technician_checklist' && result.photos && result.photos.length > 0 && <section className="photo-report"><h3>Heater photos</h3><div className="photo-list">{result.photos.map(photo=><article className="photo-check" key={photo.id}><img className={photo.highlightedUrl?'photo-highlighted':''} src={photo.kind==='not-heater'?photo.url:photo.highlightedUrl??photo.url} alt="Uploaded heater connection"/><div className="photo-detection"><strong>{photo.label}</strong><span>{Math.round(photo.confidence*100)}% confidence</span>{photo.evidence.map(item=><small key={item}>{item}</small>)}</div></article>)}</div></section>}
-            </article>
-          ))}
-        </div>
+        <article className={`suitability-summary traffic-${report.summary.level}`}><span className="traffic-dot"/><div><strong>{report.summary.label}</strong><ul>{report.summary.reasons.map(reason => <li key={reason}>{reason}</li>)}</ul><small>{report.summary.preliminaryNote}</small></div></article>
+        {findings.length > 0 && <div className="results">
+          {findings.map(finding => <article className="module-result" key={finding.id}><h3>{finding.title}</h3><ul>{finding.lines.map(line => <li key={line}>{line}</li>)}</ul>{finding.id === 'heating' && <HeatingLoadDiagram result={result}/>}</article>)}
+        </div>}
+        {result.photos && result.photos.length > 0 && <section className="photo-report"><h3>Heater photos</h3><div className="photo-list">{result.photos.map(photo=><article className="photo-check" key={photo.id}><img className={photo.highlightedUrl?'photo-highlighted':''} src={photo.kind==='not-heater'?photo.url:photo.highlightedUrl??photo.url} alt="Uploaded heater connection"/><div className="photo-detection"><strong>{photo.label}</strong><span>{Math.round(photo.confidence*100)}% confidence</span>{photo.evidence.map(item=><small key={item}>{item}</small>)}</div></article>)}</div></section>}
       </div>
+      <div className="report-open-row"><button className="button-primary" onClick={onOpenReport}>{REPORT_LOCALES.de.viewReport} <span>→</span></button></div>
     </section>
   )
 }

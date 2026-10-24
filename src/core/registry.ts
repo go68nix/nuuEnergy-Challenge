@@ -22,5 +22,6 @@ export const runAssessment = (
   return {
     building,
     modules: assessmentModules.map((module) => module.run(building, context)),
+    context,
   }
 }

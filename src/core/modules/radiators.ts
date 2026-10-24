@@ -1,4 +1,5 @@
 import type { AssessmentModule } from '../types'
+import { makeReportItem } from '../reportItems'
 
 export const radiatorsModule: AssessmentModule = {
   id: 'radiators',
@@ -9,6 +10,7 @@ export const radiatorsModule: AssessmentModule = {
       label: 'Radiator assessment',
       status: 'not_implemented',
       notes: ['Not implemented yet.'],
+      reportItems: [makeReportItem('radiators.missing', 'missing')],
     }
   },
 }
