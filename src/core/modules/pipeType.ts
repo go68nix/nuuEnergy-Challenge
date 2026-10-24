@@ -2,6 +2,7 @@ import type { AssessmentModule, BuildingInput } from '../types'
 import { estimatePipeSystemFromBuildingYear } from '../questionnaireState'
 import { getPipeYearMismatchItem, getUnclearPhotoItem } from '../reportChecks'
 import { makeReportItem } from '../reportItems'
+import { REPORT_LOCALES } from '../reportLocales'
 
 export type PipeTypeData = { pipe_system: 'two-pipe' | 'single-pipe' | 'unknown'; riskLevel: 'low' | 'medium' | 'high'; source: 'user' | 'estimated' | 'unknown'; confirmed: boolean; basis: string; confidence?: number; evidence?: string[] }
 
@@ -37,6 +38,8 @@ export const pipeTypeModule: AssessmentModule = {
       id: 'pipe_type',
       label: 'Heating pipe system',
       status: source === 'user' ? 'ok' : 'warning',
+      headline: REPORT_LOCALES.en.results.cards.pipe.headline,
+      explanation: REPORT_LOCALES.en.results.cards.pipe.explanation,
       data: assessPipeType(building),
       notes: system === 'unknown' ? [source === 'estimated' ? 'Heating pipe system unclear from the photos. A technician should check whether this is a single-pipe system, because that can require a higher flow temperature.' : 'Pipe system unknown. A technician should check whether this is a single-pipe system, because that can require a higher flow temperature.'] : undefined,
       reportItems,

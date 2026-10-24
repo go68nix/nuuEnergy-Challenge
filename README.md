@@ -15,6 +15,20 @@ Run tests:
 npm test
 ```
 
+## Chatbot setup
+
+1. Copy `.env.example` to `.env`.
+2. Open `.env` and paste your provider secret after `LLM_API_KEY=`:
+
+   ```env
+   LLM_API_KEY=paste-your-real-api-key-here
+   ```
+
+3. Check the connection with `npm run test:llm`.
+4. Start the frontend and backend together with `npm run dev:full`.
+
+The server reads `.env` at startup. Restart it after changing any environment variable. Never commit `.env` or put the key in frontend code.
+
 ## Architecture
 
 - `src/core/`: pure assessment engine (no React imports)

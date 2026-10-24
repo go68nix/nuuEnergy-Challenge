@@ -1,6 +1,7 @@
 import type { AssessmentModule, BuildingInput } from '../types'
 import { getHeatingLoadDisagreementItem } from '../reportChecks'
 import { makeReportItem } from '../reportItems'
+import { REPORT_LOCALES } from '../reportLocales'
 
 const FULL_LOAD_HOURS = 2000
 const HOT_WATER_KWH_PER_OCCUPANT = 1000
@@ -70,6 +71,8 @@ export const heatingLoadModule: AssessmentModule = {
     return {
       id: 'heating_load',
       label: 'Heating load estimate',
+      headline: REPORT_LOCALES.en.results.cards.heating.headline,
+      explanation: REPORT_LOCALES.en.results.cards.heating.explanation,
       status: 'ok',
       data: {
         methodAKw,

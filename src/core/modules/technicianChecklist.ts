@@ -1,6 +1,7 @@
 import type { AssessmentModule } from '../types'
 import { getBuildingAgeChecks } from '../reportChecks'
 import { makeReportItem } from '../reportItems'
+import { REPORT_LOCALES } from '../reportLocales'
 
 export const technicianChecklistModule: AssessmentModule = {
   id: 'technician_checklist',
@@ -10,6 +11,8 @@ export const technicianChecklistModule: AssessmentModule = {
       id: 'technician_checklist',
       label: 'Technician checklist',
       status: 'ok',
+      headline: REPORT_LOCALES.en.results.cards.checklist.headline,
+      explanation: REPORT_LOCALES.en.results.cards.checklist.explanation,
       data: {
         items: [],
       },

@@ -12,6 +12,25 @@ type ReportLocale = {
   photoLabels: Record<string, string>
   evidence: Record<string, string>
   messages: Record<string, LocaleMessage>
+  results: {
+    verdictHeadline: Record<'green' | 'yellow' | 'red', string>
+    verdictReason: string
+    preliminary: string
+    decidingFactors: string
+    whyVerdict: string
+    cards: Record<'heating' | 'flow' | 'pipe' | 'costs' | 'checklist', { headline: string; explanation: string }>
+    confidence: Record<'provided' | 'estimated' | 'unknown', string>
+    personalReasons: Record<string, string>
+    notAvailable: string
+    estimate: string
+    startOver: string
+    technicianReport: string
+    missingSummary: string
+  }
+  chat: {
+    title: string; newChat: string; close: string; inputPlaceholder: string; send: string; assistantOffline: string
+    typing: string; retry: string; welcome: string; suggestions: string[]; resultsSuggestions: string[]
+  }
 }
 
 const messages: Record<ReportLanguage, ReportLocale> = {
@@ -48,6 +67,34 @@ const messages: Record<ReportLanguage, ReportLocale> = {
       'summary.energy': { text: 'Energy use per heated area is outside the configured screening range.' },
       'summary.complete': { text: 'No major pipe or energy-use warning was identified from the provided inputs.' },
     },
+    results: {
+      verdictHeadline: { green: 'Your home looks ready for a heat pump', yellow: 'Possible, with a few things to check first', red: 'Not ready yet, but here is what stands in the way' },
+      verdictReason: 'This preliminary verdict combines the heating load, heating distribution, pipe system, and the information provided.',
+      preliminary: 'Preliminary assessment based on the information provided. A technician will confirm on site.',
+      decidingFactors: 'Deciding factors', whyVerdict: 'Why this verdict',
+      cards: {
+        heating: { headline: 'Heating load', explanation: 'The estimated design heat demand sets the size of the heat pump.' },
+        flow: { headline: 'Flow temperature and radiators', explanation: 'Lower flow temperatures generally support better heat-pump efficiency.' },
+        pipe: { headline: 'Pipe system', explanation: 'The pipe circuit affects how easily the existing heating system can be adapted.' },
+        costs: { headline: 'Running costs', explanation: 'This comparison uses the current energy use and an estimated seasonal heat-pump performance.' },
+        checklist: { headline: 'Insulation advice', explanation: 'Improving the building envelope can reduce the required heat-pump size.' },
+      },
+      confidence: { provided: 'provided', estimated: 'estimated', unknown: 'unknown' },
+      personalReasons: {
+        underfloor: 'Your underfloor heating can usually work with lower flow temperatures, and the estimated heating load is {{range}}.',
+        moderateLoad: 'The estimated heating load is {{range}}, which gives the technician a manageable starting point for system sizing.',
+        highLoad: 'The estimated heating load is {{range}}. The building envelope and room-by-room sizing deserve particular attention before a final system is chosen.',
+        twoPipe: 'A confirmed two-pipe system is a helpful starting point because supply and return are separated.',
+        singlePipe: 'The confirmed single-pipe system may require higher flow temperatures, so radiator output and the pipe circuit need an on-site review.',
+        pipeUnknown: 'The pipe system is not confirmed yet, so a technician should check the radiator connections before sizing the heat pump.',
+        saving: 'At the assumed energy prices, the heat-pump estimate is about {{amount}} cheaper per year than the current system.',
+        extraCost: 'At the assumed energy prices, the heat-pump estimate is about {{amount}} more per year, so the assumptions should be checked carefully.',
+        costSimilar: 'The two annual running-cost estimates are broadly similar; the result depends on the final system performance and energy prices.',
+      },
+      notAvailable: 'Not available yet', estimate: 'estimate', startOver: 'Start over', technicianReport: 'View technician report',
+      missingSummary: 'items still need checking on site',
+    },
+    chat: { title: 'Assessment helper', newChat: 'New chat', close: 'Close', inputPlaceholder: 'Ask about your assessment…', send: 'Send', assistantOffline: 'Assistant offline', typing: 'Thinking…', retry: 'Try again', welcome: 'Ask me about your questionnaire or heat-pump result. I will use only the information provided here.', suggestions: ['What should I prepare for the technician?', 'What does a heat pump do?'], resultsSuggestions: ['Why is my result yellow?', 'What does the heating load mean?'] },
   },
   de: {
     title: 'Technikerbericht für den Vor-Ort-Termin', subtitle: 'Vorbereitet für die Prüfung der Heizungsanlage vor Ort', back: 'Zurück zu den Ergebnissen', viewReport: 'Technikerbericht öffnen', print: 'Drucken / als PDF speichern', copy: 'Als Text kopieren', copied: 'Kopiert', language: 'Sprache',
@@ -82,6 +129,34 @@ const messages: Record<ReportLanguage, ReportLocale> = {
       'summary.energy': { text: 'Der Energieverbrauch je beheizter Fläche liegt außerhalb des eingestellten Prüfkorridors.' },
       'summary.complete': { text: 'Die angegebenen Daten zeigen keine wesentlichen Warnhinweise zum Rohrsystem oder Energieverbrauch.' },
     },
+    results: {
+      verdictHeadline: { green: 'Ihr Gebäude wirkt für eine Wärmepumpe geeignet', yellow: 'Möglich, aber einige Punkte sollten zuerst geprüft werden', red: 'Noch nicht bereit – das steht derzeit im Weg' },
+      verdictReason: 'Diese vorläufige Einschätzung kombiniert Heizlast, Wärmeverteilung, Rohrsystem und die angegebenen Daten.',
+      preliminary: 'Vorläufige Einschätzung auf Basis der angegebenen Informationen. Ein Techniker bestätigt dies vor Ort.',
+      decidingFactors: 'Entscheidende Faktoren', whyVerdict: 'Warum dieses Ergebnis',
+      cards: {
+        heating: { headline: 'Heizlast', explanation: 'Die geschätzte Heizlast bestimmt die Größe der Wärmepumpe.' },
+        flow: { headline: 'Vorlauftemperatur und Heizkörper', explanation: 'Niedrige Vorlauftemperaturen unterstützen normalerweise einen effizienten Wärmepumpenbetrieb.' },
+        pipe: { headline: 'Rohrsystem', explanation: 'Das Rohrsystem beeinflusst, wie leicht die bestehende Heizung angepasst werden kann.' },
+        costs: { headline: 'Betriebskosten', explanation: 'Der Vergleich nutzt den aktuellen Verbrauch und eine geschätzte Jahresarbeitszahl.' },
+        checklist: { headline: 'Dämmempfehlung', explanation: 'Eine bessere Gebäudehülle kann die erforderliche Wärmepumpengröße reduzieren.' },
+      },
+      confidence: { provided: 'angegeben', estimated: 'geschätzt', unknown: 'unbekannt' },
+      personalReasons: {
+        underfloor: 'Ihre Fußbodenheizung kann meist mit niedrigeren Vorlauftemperaturen arbeiten; die geschätzte Heizlast liegt bei {{range}}.',
+        moderateLoad: 'Die geschätzte Heizlast liegt bei {{range}}. Das ist ein gut handhabbarer Ausgangspunkt für die Auslegung durch den Techniker.',
+        highLoad: 'Die geschätzte Heizlast liegt bei {{range}}. Gebäudehülle und raumweise Auslegung sollten vor der endgültigen Auswahl besonders geprüft werden.',
+        twoPipe: 'Ein bestätigtes Zweirohrsystem ist ein guter Ausgangspunkt, weil Vor- und Rücklauf getrennt sind.',
+        singlePipe: 'Das bestätigte Einrohrsystem kann höhere Vorlauftemperaturen erfordern; Heizkörperleistung und Rohrkreis müssen vor Ort geprüft werden.',
+        pipeUnknown: 'Das Rohrsystem ist noch nicht bestätigt. Ein Techniker sollte die Heizkörperanschlüsse vor der Auslegung prüfen.',
+        saving: 'Unter den angenommenen Energiepreisen liegen die geschätzten Wärmepumpenkosten etwa {{amount}} pro Jahr niedriger.',
+        extraCost: 'Unter den angenommenen Energiepreisen liegen die geschätzten Wärmepumpenkosten etwa {{amount}} pro Jahr höher; die Annahmen sollten geprüft werden.',
+        costSimilar: 'Die beiden jährlichen Betriebskostenschätzungen liegen nahe beieinander; entscheidend sind die endgültige Anlagenleistung und Energiepreise.',
+      },
+      notAvailable: 'Noch nicht verfügbar', estimate: 'Schätzung', startOver: 'Neu starten', technicianReport: 'Technikerbericht ansehen',
+      missingSummary: 'Punkte müssen noch vor Ort geprüft werden',
+    },
+    chat: { title: 'Assistent für Ihre Einschätzung', newChat: 'Neuer Chat', close: 'Schließen', inputPlaceholder: 'Frage zu Ihrer Einschätzung…', send: 'Senden', assistantOffline: 'Assistent nicht verfügbar', typing: 'Denkt nach…', retry: 'Erneut versuchen', welcome: 'Fragen Sie mich zu Ihrem Fragebogen oder Wärmepumpenergebnis. Ich nutze nur die hier angegebenen Informationen.', suggestions: ['Was soll ich für den Techniker vorbereiten?', 'Was macht eine Wärmepumpe?'], resultsSuggestions: ['Warum ist mein Ergebnis gelb?', 'Was bedeutet die Heizlast?'] },
   },
 }
 

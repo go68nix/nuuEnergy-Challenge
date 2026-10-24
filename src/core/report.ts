@@ -94,7 +94,6 @@ export const buildReport = (building: BuildingInput, assessment: AssessmentResul
   else if (energyIntensity > 500) trafficLevel = 'red'
   const specificReasonKeys = Array.isArray(trafficData.reasonKeys) ? trafficData.reasonKeys as string[] : []
   const specificReasons = specificReasonKeys.map(key => locale.messages[key]?.text).filter((text): text is string => Boolean(text))
-  const trafficReasons = [...new Set([...specificReasons, ...locale.summaryReasons[trafficLevel]])].slice(0, 2)
   const buildingType = building.buildingType ? locale.values[building.buildingType] : undefined
   const buildingIdentifier = [buildingType ?? (language === 'de' ? 'Gebäude' : 'Building'), building.constructionOrRenovationYear, `${fmt(building.heatedFloorAreaM2, language)} m²`].join(' · ')
 
@@ -106,6 +105,31 @@ export const buildReport = (building: BuildingInput, assessment: AssessmentResul
   const costs = record(modules.get('operating_cost')?.data)
   const flowClass = assessment.context?.flowTemperatureClass
   const flowLabels = language === 'de' ? { low: 'Niedrig', medium: 'Mittel', high: 'Hoch' } : { low: 'Low', medium: 'Medium', high: 'High' }
+  const personalReasons: string[] = []
+  const formatRange = combined ? `${fmt(combined[0], language, 1)}–${fmt(combined[1], language, 1)} kW` : locale.labels.notAvailable
+  if (building.heatingDistribution === 'underfloor') {
+    personalReasons.push(formatReportTemplate(locale.results.personalReasons.underfloor, { range: formatRange }))
+  } else if (combined && combined[1] <= 15) {
+    personalReasons.push(formatReportTemplate(locale.results.personalReasons.moderateLoad, { range: formatRange }))
+  } else if (combined) {
+    personalReasons.push(formatReportTemplate(locale.results.personalReasons.highLoad, { range: formatRange }))
+  }
+  if (pipe.pipe_system === 'two-pipe' && pipe.source === 'user') {
+    personalReasons.push(locale.results.personalReasons.twoPipe)
+  } else if (pipe.pipe_system === 'single-pipe') {
+    personalReasons.push(locale.results.personalReasons.singlePipe)
+  } else {
+    personalReasons.push(locale.results.personalReasons.pipeUnknown)
+  }
+  const savings = number(costs.annualSavingsEur)
+  if (savings !== undefined) {
+    const amount = money(Math.abs(savings), language)
+    personalReasons.push(formatReportTemplate(
+      savings > 25 ? locale.results.personalReasons.saving : savings < -25 ? locale.results.personalReasons.extraCost : locale.results.personalReasons.costSimilar,
+      { amount },
+    ))
+  }
+  const trafficReasons = [...new Set([...personalReasons, ...specificReasons, ...locale.summaryReasons[trafficLevel]])].slice(0, 3)
   const findings: ReportFinding[] = [
     { id: 'heating', title: locale.findings.heating, lines: [
       `${locale.labels.methodA}: ${methodARange === undefined ? locale.labels.notAvailable : `${fmt(methodARange, language, 1)} kW`}`,

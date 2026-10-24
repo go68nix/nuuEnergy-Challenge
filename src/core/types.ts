@@ -52,6 +52,8 @@ export type ModuleResult = {
   id: string
   label: string
   status: ModuleStatus
+  headline?: string
+  explanation?: string
   data?: unknown
   notes?: string[]
   reportItems?: ReportItem[]

@@ -1,6 +1,7 @@
 import type { AssessmentModule, BuildingInput } from '../types'
 import { getImplausibleEnergyUseItem } from '../reportChecks'
 import { makeReportItem } from '../reportItems'
+import { REPORT_LOCALES } from '../reportLocales'
 
 const ELECTRICITY_EUR_PER_KWH = 0.26
 const GAS_EUR_PER_KWH = 0.11
@@ -59,6 +60,8 @@ export const operatingCostModule: AssessmentModule = {
       id: 'operating_cost',
       label: 'Operating cost estimate',
       status: annualSavingsEur >= 0 ? 'ok' : 'warning',
+      headline: REPORT_LOCALES.en.results.cards.costs.headline,
+      explanation: REPORT_LOCALES.en.results.cards.costs.explanation,
       data: {
         jaz,
         currentCostEur,
