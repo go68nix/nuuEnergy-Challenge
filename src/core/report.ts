@@ -88,10 +88,10 @@ export const buildReport = (building: BuildingInput, assessment: AssessmentResul
   const onSiteChecklist = allItems.filter(item => item.kind === 'verify')
 
   const trafficData = record(modules.get('traffic_light')?.data)
-  let trafficLevel: 'green' | 'yellow' | 'red' = trafficData.level === 'green' || trafficData.level === 'red' ? trafficData.level : 'yellow'
+  let trafficLevel: 'green' | 'yellow' | 'red' = trafficData.level === 'green' ? 'green' : 'yellow'
   const energyIntensity = building.heatedFloorAreaM2 > 0 ? (building.annualConsumption * (building.fuelType === 'gas_kwh' ? 1 : 10)) / building.heatedFloorAreaM2 : Number.POSITIVE_INFINITY
-  if (building.pipeSystemSource === 'user' && building.pipe_system === 'single-pipe') trafficLevel = 'red'
-  else if (energyIntensity > 500) trafficLevel = 'red'
+  if (building.pipeSystemSource === 'user' && building.pipe_system === 'single-pipe') trafficLevel = 'yellow'
+  else if (energyIntensity > 500) trafficLevel = 'yellow'
   const specificReasonKeys = Array.isArray(trafficData.reasonKeys) ? trafficData.reasonKeys as string[] : []
   const specificReasons = specificReasonKeys.map(key => locale.messages[key]?.text).filter((text): text is string => Boolean(text))
   const buildingType = building.buildingType ? locale.values[building.buildingType] : undefined
