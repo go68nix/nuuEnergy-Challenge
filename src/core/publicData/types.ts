@@ -25,6 +25,8 @@ export type GridAndDsoContext = {
 export type ZensusPriors = {
   state: string
   dominantEra: string
+  /** First and last construction year of the dominant era. */
+  era: [number, number]
   estimatedYear: number
   dominantFuel: 'gas' | 'oil' | 'district' | 'heat_pump' | 'pellet'
   source: string

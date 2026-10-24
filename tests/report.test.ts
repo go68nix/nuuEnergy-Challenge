@@ -41,6 +41,13 @@ describe('technician report builder', () => {
     expect(unknownReport.buildingData.find(entry=>entry.key==='pipeSystem')).toMatchObject({ value:'Unknown', source:'unknown' })
   })
 
+  /** A construction year taken from the regional prior shows as estimated, not as provided. */
+  it('labels an estimated construction year as estimated', () => {
+    const estimatedYear: BuildingInput = { ...provided, constructionYearSource:'estimated' }
+    const report = buildReport(estimatedYear, assessment(estimatedYear), 'en')
+    expect(report.buildingData.find(entry=>entry.key==='constructionYear')?.source).toBe('estimated')
+  })
+
   it('orders high-priority items first and deduplicates repeated text', () => {
     const result = assessment(provided)
     const duplicate: ReportItem = { kind:'verify', text:'Duplicate check', reason:'Second source', priority:'normal' }

@@ -25,6 +25,7 @@ export type BuildingInput = {
   annualConsumption: number
   occupants?: number
   constructionOrRenovationYear: number
+  constructionYearSource?: 'user' | 'estimated'
   heatedFloorAreaM2: number
   heatingDistribution?: 'radiator' | 'underfloor' | 'mixed'
   buildingType?: 'single_two_family' | 'apartment' | 'end_terrace' | 'mid_terrace' | 'semi_detached'

@@ -15,6 +15,7 @@ export const buildingSchema = z.object({
     .int('Year must be a whole number')
     .min(1800, 'Year looks too old')
     .max(new Date().getFullYear(), 'Year cannot be in the future'),
+  constructionYearSource: z.enum(['user', 'estimated']).optional(),
   heatedFloorAreaM2: z.coerce.number().positive('Heated floor area must be greater than 0'),
   heatingDistribution: z.enum(['radiator', 'underfloor', 'mixed']).optional(),
   buildingType: z.enum(['single_two_family', 'apartment', 'end_terrace', 'mid_terrace', 'semi_detached']).optional(),

@@ -59,7 +59,7 @@ const localizedBuildingData = (building: BuildingInput, language: ReportLanguage
     ['fuelType', fields.fuel, building.heatingSystem ?? building.fuelType, sourceFor(building.heatingSystem ?? building.fuelType)],
     ['annualConsumption', fields.consumption, `${fmt(building.annualConsumption, language)} ${building.fuelType === 'gas_m3' ? 'm³' : building.fuelType === 'heating_oil_l' ? 'L' : 'kWh'} / ${language === 'de' ? 'Jahr' : 'year'}`, sourceFor(building.annualConsumption)],
     ['occupants', fields.occupants, building.occupants, sourceFor(building.occupants)],
-    ['constructionYear', fields.constructionYear, building.constructionOrRenovationYear, sourceFor(building.constructionOrRenovationYear)],
+    ['constructionYear', fields.constructionYear, building.constructionOrRenovationYear, building.constructionYearSource === 'estimated' ? 'estimated' : sourceFor(building.constructionOrRenovationYear)],
     ['floorArea', fields.floorArea, `${fmt(building.heatedFloorAreaM2, language)} m²`, sourceFor(building.heatedFloorAreaM2)],
     ['heatingDistribution', fields.heatingDistribution, building.heatingDistribution, sourceFor(building.heatingDistribution)],
     ['buildingType', fields.buildingType, building.buildingType, sourceFor(building.buildingType)],
