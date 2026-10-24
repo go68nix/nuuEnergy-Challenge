@@ -16,19 +16,13 @@ function App() {
   }
 
   return (
-    <main className="app">
-      <header>
-        <h1>Heat Pump Suitability Checker (Prototype)</h1>
-      </header>
-      <DropZone
-        onParsed={(parseResult) => {
-          setBuildings(parseResult.validRows)
-          setRowErrors(parseResult.rowErrors)
-        }}
-      />
-      <BuildingTable buildings={buildings} rowErrors={rowErrors} onSelectBuilding={assessBuilding} />
+    <main className="app" id="top">
+      <header className="site-header"><a className="brand" href="#top"><span className="brand-mark">n</span> nuu<span>energy</span></a><span className="header-tag">HOME ENERGY ASSESSMENT</span></header>
       <BuildingForm onSubmitBuilding={assessBuilding} />
       <ResultPanel result={result} />
+      <details className="import-area"><summary>Already have your data? Import a CSV</summary><DropZone
+        onParsed={(parseResult) => { setBuildings(parseResult.validRows); setRowErrors(parseResult.rowErrors) }}
+      /><BuildingTable buildings={buildings} rowErrors={rowErrors} onSelectBuilding={assessBuilding} /></details>
     </main>
   )
 }

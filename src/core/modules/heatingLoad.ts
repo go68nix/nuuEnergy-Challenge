@@ -39,7 +39,7 @@ export const heatingLoadModule: AssessmentModule = {
   label: 'Heating load estimate',
   run(building) {
     const consumptionKwh = getConsumptionKwh(building)
-    const usableHeatKwh = Math.max(consumptionKwh * 0.88 - building.occupants * HOT_WATER_KWH_PER_OCCUPANT, 0)
+    const usableHeatKwh = Math.max(consumptionKwh * 0.88 - (building.occupants ?? 0) * HOT_WATER_KWH_PER_OCCUPANT, 0)
     const methodAKw = usableHeatKwh / FULL_LOAD_HOURS
 
     const [baselineMinWm2, baselineMaxWm2] = getBaselineWPerM2Range(

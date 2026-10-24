@@ -6,13 +6,21 @@ export const buildingSchema = z.object({
   occupants: z.coerce
     .number()
     .int('Occupants must be a whole number')
-    .min(1, 'Occupants must be at least 1'),
+    .min(1, 'Occupants must be at least 1').optional(),
   constructionOrRenovationYear: z.coerce
     .number()
     .int('Year must be a whole number')
     .min(1800, 'Year looks too old')
     .max(new Date().getFullYear(), 'Year cannot be in the future'),
   heatedFloorAreaM2: z.coerce.number().positive('Heated floor area must be greater than 0'),
+  heatingDistribution: z.enum(['radiator', 'underfloor', 'mixed']).optional(),
+  buildingType: z.enum(['single_two_family', 'apartment', 'end_terrace', 'mid_terrace', 'semi_detached']).optional(),
+  heatingSystem: z.enum(['gas', 'oil', 'pellet', 'gas_condensing', 'oil_condensing', 'district_other']).optional(),
+  facadeInsulated: z.coerce.boolean().optional(),
+  roofInsulated: z.coerce.boolean().optional(),
+  heatingSystemAge: z.enum(['0_9', '10_19', '20_29', '30_plus', 'unknown']).optional(),
+  replacementTiming: z.enum(['immediately', '1_3_months', '3_6_months', 'over_6_months', 'not_planned']).optional(),
+  winterHeatedShare: z.enum(['half', 'third', 'quarter', 'other']).optional(),
 })
 
 export type BuildingSchema = z.infer<typeof buildingSchema>

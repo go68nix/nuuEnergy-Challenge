@@ -1,98 +1,32 @@
 import { useState } from 'react'
 import { buildingSchema } from '../core/schema'
-import type { BuildingInput, FuelType } from '../core/types'
+import type { BuildingInput } from '../core/types'
 
-type BuildingFormProps = {
-  onSubmitBuilding: (building: BuildingInput) => void
+type Props = { onSubmitBuilding: (building: BuildingInput) => void }
+type AnswerKey = keyof BuildingInput
+type Choice = { value: string; label: string; detail?: string }
+type Question = { key: AnswerKey; title: string; hint: string; type: 'choice' | 'range' | 'year'; choices?: Choice[]; min?: number; max?: number; unit?: string }
+const questions: Question[] = [
+  { key: 'heatingDistribution', title: 'How is your room heated?', hint: 'Choose the heating type used in the rooms you use most.', type: 'choice', choices: [{value:'radiator',label:'Radiator'},{value:'underfloor',label:'Underfloor heating'},{value:'mixed',label:'Underfloor heating and radiator'}] },
+  { key: 'buildingType', title: 'What type of building is this?', hint: 'Choose the closest match for your home.', type: 'choice', choices: [{value:'single_two_family',label:'Single or two family house'},{value:'apartment',label:'Apartment building'},{value:'end_terrace',label:'End-of-terrace house'},{value:'mid_terrace',label:'Terraced house · middle'},{value:'semi_detached',label:'Semi-detached house'}] },
+  { key: 'heatingSystem', title: 'How do you currently heat your building?', hint: 'Choose the system currently installed.', type: 'choice', choices: [{value:'gas',label:'Gas heating'},{value:'oil',label:'Oil heating'},{value:'pellet',label:'Pellet heating'},{value:'gas_condensing',label:'Condensing gas boiler'},{value:'oil_condensing',label:'Condensing oil heating'},{value:'district_other',label:'District heating or other'}] },
+  { key: 'annualConsumption', title: 'What is your average annual consumption?', hint: 'Use your annual statement. Estimate if needed.', type: 'range', min: 1000, max: 60000, unit: 'kWh / year' },
+  { key: 'constructionOrRenovationYear', title: 'In which year was this building built?', hint: 'Enter the original construction year. A rough estimate is fine.', type: 'year', min: 1800, max: new Date().getFullYear(), unit: 'year' },
+  { key: 'facadeInsulated', title: 'Was the facade subsequently insulated?', hint: 'Choose “Yes” if insulation was added after construction.', type: 'choice', choices: [{value:'true',label:'Yes'},{value:'false',label:'No'},{value:'unknown',label:'I don’t know'}] },
+  { key: 'roofInsulated', title: 'Was your roof retrofitted or insulated?', hint: 'Choose “Yes” if the roof or attic was insulated later.', type: 'choice', choices: [{value:'true',label:'Yes'},{value:'false',label:'No'},{value:'unknown',label:'I don’t know'}] },
+  { key: 'heatedFloorAreaM2', title: 'What is the heated living space?', hint: 'Include the indoor area that is regularly heated.', type: 'range', min: 30, max: 500, unit: 'm²' },
+  { key: 'heatingSystemAge', title: 'How long has your heating system been in operation?', hint: 'Select “Unknown” if you are not sure.', type: 'choice', choices: [{value:'0_9',label:'0–9 years'},{value:'10_19',label:'10–19 years'},{value:'20_29',label:'20–29 years'},{value:'30_plus',label:'30+ years'},{value:'unknown',label:'Unknown'}] },
+  { key: 'replacementTiming', title: 'When should a new heating system be installed?', hint: 'This helps us understand your timeline.', type: 'choice', choices: [{value:'immediately',label:'Immediately'},{value:'1_3_months',label:'In 1 to 3 months'},{value:'3_6_months',label:'In 3 to 6 months'},{value:'over_6_months',label:'In more than 6 months'},{value:'not_planned',label:'Not currently planned'}] },
+  { key: 'winterHeatedShare', title: 'How much of your apartment is heated in winter?', hint: 'Optional detail to refine the home profile.', type: 'choice', choices: [{value:'half',label:'About one half'},{value:'third',label:'About one third'},{value:'quarter',label:'About one quarter'},{value:'other',label:'Other'}] },
+]
+const initial: Partial<Record<AnswerKey, string | number | boolean>> = { heatingDistribution: '', buildingType: '', heatingSystem: '', annualConsumption: 18000, constructionOrRenovationYear: 1990, facadeInsulated: '', roofInsulated: '', heatedFloorAreaM2: 140, heatingSystemAge: '', replacementTiming: '', winterHeatedShare: '' }
+const labels: Record<string,string> = { radiator:'Radiator',underfloor:'Underfloor heating',mixed:'Underfloor heating and radiator',single_two_family:'Single or two family house',apartment:'Apartment building',end_terrace:'End-of-terrace house',mid_terrace:'Terraced house · middle',semi_detached:'Semi-detached house',gas:'Gas heating',oil:'Oil heating',pellet:'Pellet',gas_condensing:'Condensing gas boiler',oil_condensing:'Condensing oil heating',district_other:'District heating or other',true:'Yes',false:'No',unknown:'Unknown',half:'About one half',third:'About one third',quarter:'About one quarter',other:'Other','0_9':'0–9 years','10_19':'10–19 years','20_29':'20–29 years','30_plus':'30+ years',immediately:'Immediately','1_3_months':'In 1 to 3 months','3_6_months':'In 3 to 6 months',over_6_months:'In more than 6 months',not_planned:'Not currently planned' }
+
+export const BuildingForm = ({ onSubmitBuilding }: Props) => {
+  const [started,setStarted]=useState(false),[step,setStep]=useState(0),[values,setValues]=useState(initial),[error,setError]=useState('')
+  const finish=()=>{ const normalized={...values, occupants:undefined, annualConsumption:Number(values.annualConsumption),heatedFloorAreaM2:Number(values.heatedFloorAreaM2),constructionOrRenovationYear:Number(values.constructionOrRenovationYear),fuelType:'gas_kwh'}; const parsed=buildingSchema.safeParse(normalized); if(!parsed.success){setError(parsed.error.issues[0]?.message??'Please check your answers.');return} setError('');onSubmitBuilding(parsed.data);setStep(questions.length) }
+  const setAnswer=(key:AnswerKey,value:string|number|boolean|undefined)=>setValues(v=>({...v,[key]:value}))
+  return <section className="intake-shell" id="assessment">{!started?<div className="welcome-card"><div className="welcome-copy"><span className="eyebrow">YOUR HOME, MORE COMFORTABLY</span><h1>A clearer path to<br/><em>cleaner heating.</em></h1><p>Answer a few quick questions about your home and we’ll create a tailored heat pump suitability snapshot.</p><div className="welcome-meta"><span>◷ &nbsp;About 3 minutes</span><span>⌂ &nbsp;No technical knowledge needed</span></div><button className="button-primary" onClick={()=>setStarted(true)}>Start your assessment <span>→</span></button></div><div className="welcome-art" aria-hidden="true"><div className="sun-orb"/><div className="house"><div className="roof"/><div className="house-body"><div className="window w1"/><div className="window w2"/><div className="door"/></div><div className="chimney"/></div><div className="art-caption">A warmer home.<br/>A lighter footprint.</div></div></div>:<div className="wizard-card"><div className="wizard-top"><a className="brand" href="#top"><span className="brand-mark">n</span> nuu<span>energy</span></a><span className="step-label">{step<questions.length?`QUESTION ${step+1} OF ${questions.length}`:'ASSESSMENT COMPLETE'}</span></div>{step<questions.length?<><div className="progress-track"><div style={{width:`${(step+1)/questions.length*100}%`}}/></div><div className="question-area"><span className="question-index">{String(step+1).padStart(2,'0')} <i> / {String(questions.length).padStart(2,'0')}</i></span><h2>{questions[step].title}</h2><p>{questions[step].hint}</p>{questions[step].type==='choice'?<div className="choice-grid">{questions[step].choices?.map(c=><button key={c.value} type="button" className={`choice ${String(values[questions[step].key])===c.value?'selected':''}`} onClick={()=>{const isInsulation=questions[step].key==='facadeInsulated'||questions[step].key==='roofInsulated';setAnswer(questions[step].key,isInsulation?(c.value==='unknown'?undefined:c.value==='true'):c.value)}}><span className="choice-icon">⌁</span><strong>{c.label}</strong><span className="radio"/></button>)}</div>:<><label className="answer-field"><input aria-label={questions[step].title} type="range" min={questions[step].min} max={questions[step].max} step={questions[step].type==='year'?1:questions[step].key==='heatedFloorAreaM2'?5:500} value={Number(values[questions[step].key]??questions[step].min)} onChange={e=>setAnswer(questions[step].key,Number(e.target.value))}/><strong>{Number(values[questions[step].key]).toLocaleString()} <small>{questions[step].unit}</small></strong></label>{questions[step].type==='year'&&<input className="year-input" aria-label="Enter construction year" type="number" min="1800" max={new Date().getFullYear()} value={Number(values.constructionOrRenovationYear)} onChange={e=>setAnswer(questions[step].key,Number(e.target.value))}/>}</>}{error&&<p className="field-error" role="alert">{error}</p>}</div><div className="wizard-footer"><button className="text-button" onClick={()=>step===0?setStarted(false):setStep(s=>s-1)}>← &nbsp;{step===0?'Back':'Previous'}</button><span>Your answers stay on this device</span><button className="button-primary" onClick={()=>step===questions.length-1?finish():(setError(''),setStep(s=>s+1))}>{step===questions.length-1?'See my assessment':'Continue'} <span>→</span></button></div></>:<div className="complete-state"><div className="complete-icon">✓</div><span className="eyebrow">THANK YOU</span><h2>Your home snapshot is ready.</h2><p>We’ve gathered your details and prepared your assessment below.</p><button className="text-button" onClick={()=>{setStarted(false);setStep(0)}}>Start over</button></div>}</div>}</section>
 }
 
-const initialValues = {
-  fuelType: 'gas_m3' as FuelType,
-  annualConsumption: '',
-  occupants: '',
-  constructionOrRenovationYear: '',
-  heatedFloorAreaM2: '',
-}
-
-export const BuildingForm = ({ onSubmitBuilding }: BuildingFormProps) => {
-  const [values, setValues] = useState(initialValues)
-  const [errors, setErrors] = useState<string[]>([])
-
-  return (
-    <section className="card">
-      <h2>Manual building input</h2>
-      <form
-        className="form-grid"
-        onSubmit={(event) => {
-          event.preventDefault()
-          const result = buildingSchema.safeParse(values)
-          if (!result.success) {
-            setErrors(result.error.issues.map((issue) => `${issue.path.join('.')}: ${issue.message}`))
-            return
-          }
-
-          setErrors([])
-          onSubmitBuilding(result.data)
-        }}
-      >
-        <label>
-          Fuel type
-          <select
-            value={values.fuelType}
-            onChange={(event) => setValues((current) => ({ ...current, fuelType: event.target.value as FuelType }))}
-          >
-            <option value="gas_m3">Gas (m3)</option>
-            <option value="gas_kwh">Gas (kWh)</option>
-            <option value="heating_oil_l">Heating oil (L)</option>
-          </select>
-        </label>
-        <label>
-          Annual consumption
-          <input
-            type="number"
-            value={values.annualConsumption}
-            onChange={(event) => setValues((current) => ({ ...current, annualConsumption: event.target.value }))}
-          />
-        </label>
-        <label>
-          Number of occupants
-          <input
-            type="number"
-            value={values.occupants}
-            onChange={(event) => setValues((current) => ({ ...current, occupants: event.target.value }))}
-          />
-        </label>
-        <label>
-          Construction or renovation year
-          <input
-            type="number"
-            value={values.constructionOrRenovationYear}
-            onChange={(event) =>
-              setValues((current) => ({ ...current, constructionOrRenovationYear: event.target.value }))
-            }
-          />
-        </label>
-        <label>
-          Heated floor area (m2)
-          <input
-            type="number"
-            value={values.heatedFloorAreaM2}
-            onChange={(event) => setValues((current) => ({ ...current, heatedFloorAreaM2: event.target.value }))}
-          />
-        </label>
-        <div className="photo-placeholder">
-          <strong>Photo upload (placeholder)</strong>
-          <p>Not implemented yet.</p>
-        </div>
-        <button type="submit">Run assessment</button>
-      </form>
-      {errors.length > 0 && (
-        <ul className="error-list">
-          {errors.map((error) => (
-            <li key={error}>{error}</li>
-          ))}
-        </ul>
-      )}
-    </section>
-  )
-}
+export const answerLabel = (value: unknown): string | undefined => typeof value === 'boolean' ? value ? 'Yes' : 'No' : typeof value === 'string' ? labels[value] ?? value : typeof value === 'number' ? String(value) : undefined
