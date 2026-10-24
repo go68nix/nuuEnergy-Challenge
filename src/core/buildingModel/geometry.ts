@@ -97,6 +97,14 @@ export const containsPoint = (ring: Point[], p: Point) => {
   return inside
 }
 
+const closestOnSegment = (p: Point, a: Point, b: Point): Point => {
+  const dx = b.x - a.x
+  const dy = b.y - a.y
+  const lengthSquared = dx * dx + dy * dy
+  const t = lengthSquared === 0 ? 0 : Math.max(0, Math.min(1, ((p.x - a.x) * dx + (p.y - a.y) * dy) / lengthSquared))
+  return { x: a.x + t * dx, y: a.y + t * dy }
+}
+
 /**
  * Compute the distance from a point to a segment.
  *
@@ -106,12 +114,22 @@ export const containsPoint = (ring: Point[], p: Point) => {
  * :returns: Distance in metres.
  */
 export const distanceToSegment = (p: Point, a: Point, b: Point) => {
-  const dx = b.x - a.x
-  const dy = b.y - a.y
-  const lengthSquared = dx * dx + dy * dy
-  const t = lengthSquared === 0 ? 0 : Math.max(0, Math.min(1, ((p.x - a.x) * dx + (p.y - a.y) * dy) / lengthSquared))
-  return Math.hypot(p.x - (a.x + t * dx), p.y - (a.y + t * dy))
+  const closest = closestOnSegment(p, a, b)
+  return Math.hypot(p.x - closest.x, p.y - closest.y)
 }
+
+/**
+ * Find the point on a ring's outline that is closest to a point.
+ *
+ * :param ring: Open ring.
+ * :param p: Point.
+ * :returns: The closest outline point and its distance in metres.
+ */
+export const closestOnOutline = (ring: Point[], p: Point) =>
+  ring
+    .map((a, i) => closestOnSegment(p, a, ring[(i + 1) % ring.length]))
+    .map(point => ({ point, distance: Math.hypot(p.x - point.x, p.y - point.y) }))
+    .reduce((best, next) => (next.distance < best.distance ? next : best))
 
 /**
  * Compute the distance from a point to the outline of a ring.
