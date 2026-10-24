@@ -29,6 +29,30 @@ describe('DIN EN 12831 Outdoor Design Temperature', () => {
     const nearest = lookupDesignOutdoorTemperature('80330')
     expect(nearest.matchedCity).toContain('München')
   })
+
+  it('accepts common address word orders and separators', () => {
+    expect(parseLocationInput('Sendlinger Straße 10, 80331 München')).toMatchObject({
+      postalCode: '80331',
+      street: 'Sendlinger Straße',
+      houseNumber: '10',
+      city: 'München',
+      queryType: 'address',
+    })
+    expect(parseLocationInput('80331 München, Sendlinger Str. 10a')).toMatchObject({
+      postalCode: '80331',
+      street: 'Sendlinger Str',
+      houseNumber: '10a',
+      city: 'München',
+      queryType: 'address',
+    })
+    expect(parseLocationInput('10 Sendlinger Str., 80331 München')).toMatchObject({
+      postalCode: '80331',
+      street: 'Sendlinger Str',
+      houseNumber: '10',
+      city: 'München',
+      queryType: 'address',
+    })
+  })
 })
 
 describe('DSO Directory and Section 14a EnWG Guarantee', () => {

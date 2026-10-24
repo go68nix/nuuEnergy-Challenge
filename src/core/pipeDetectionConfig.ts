@@ -20,5 +20,5 @@ export const PIPE_DETECTION_CONFIG: {
   },
   backgroundModel: 'briaai/RMBG-1.4',
   backgroundModelDtype: 'q8',
-  highlight: { color: '#22c55e', opacity: 0.45, backgroundDim: 0.84, maxSide: 1024 },
+  highlight: { color: '#3b82f6', opacity: 0.45, backgroundDim: 0.84, maxSide: 1024 },
 }

@@ -66,7 +66,7 @@ export const resolveBuildingGeometry = async (
     try {
       const controller = new AbortController()
       const timeoutId = setTimeout(() => controller.abort(), 600)
-      const q = encodeURIComponent(`${components.street} ${components.houseNumber ?? ''}, ${components.postalCode} Deutschland`)
+      const q = encodeURIComponent(`${components.street} ${components.houseNumber ?? ''}, ${components.postalCode}${components.city ? ` ${components.city}` : ''}, Deutschland`)
       const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${q}&format=json&limit=1&polygon_geojson=1`, {
         signal: controller.signal,
         headers: { 'User-Agent': 'nuuEnergy-PublicData-Check/1.0' },

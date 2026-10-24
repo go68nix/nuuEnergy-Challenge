@@ -28,7 +28,7 @@ export type AddressComponents = {
  * :returns: Structured AddressComponents object.
  */
 export const parseLocationInput = (query: string): AddressComponents => {
-  const trimmed = query.trim()
+  const trimmed = query.trim().replace(/[;|]+/g, ',').replace(/\s+/g, ' ')
   if (!trimmed) {
     return { queryType: 'unknown', rawQuery: query }
   }
@@ -36,21 +36,20 @@ export const parseLocationInput = (query: string): AddressComponents => {
   // German 5-digit postal code match
   const plzMatch = trimmed.match(/\b([0-9]{5})\b/)
   const postalCode = plzMatch ? plzMatch[1] : undefined
+  const chunks = trimmed.split(',').map(chunk => chunk.trim()).filter(Boolean)
+  const addressChunk = chunks.find(chunk => /\d/.test(chunk) && !/^\d{5}\b/.test(chunk))
+  const numberAfterStreet = addressChunk?.match(/\b(\d+[a-zA-Z]?(?:[-/]\d+[a-zA-Z]?)?)\b/)
+  const numberBeforeStreet = addressChunk?.match(/^\s*(\d+[a-zA-Z]?(?:[-/]\d+[a-zA-Z]?)?)\s+(.+)/)
+  const houseNumber = numberBeforeStreet?.[1] ?? numberAfterStreet?.[1]
+  const street = numberBeforeStreet
+    ? numberBeforeStreet[2].trim().replace(/[,.]+$/, '').trim()
+    : numberAfterStreet
+    ? addressChunk?.slice(0, numberAfterStreet.index).trim().replace(/[,.]+$/, '').trim()
+    : undefined
 
-  // Street name and house number heuristic (e.g. "Sendlinger Str. 12" or "Musterstraße 5a")
-  const streetMatch = trimmed.match(/([a-zA-ZäöüÄÖÜß.\s-]+?)\s+(\d+[a-zA-Z]?)\b/)
-  const street = streetMatch ? streetMatch[1].trim() : undefined
-  const houseNumber = streetMatch ? streetMatch[2].trim() : undefined
-
-  // City heuristic: if PLZ is followed by word, extract city
-  let city: string | undefined
-  if (postalCode) {
-    const afterPlz = trimmed.slice(trimmed.indexOf(postalCode) + 5).replace(/^[,.\s]+/, '')
-    const cityMatch = afterPlz.match(/^([a-zA-ZäöüÄÖÜß\s-]+)/)
-    if (cityMatch && cityMatch[1].trim()) {
-      city = cityMatch[1].trim()
-    }
-  }
+  // City can appear before or after the address, with or without a comma.
+  const withoutPostal = trimmed.replace(postalCode ?? '', ' ').replace(addressChunk ?? '', ' ').replace(/[,.]+/g, ' ')
+  const city = withoutPostal.replace(/\s+/g, ' ').trim() || undefined
 
   const queryType: QueryType = (street && houseNumber) || (postalCode && street)
     ? 'address'
@@ -60,7 +59,7 @@ export const parseLocationInput = (query: string): AddressComponents => {
 
   return {
     postalCode,
-    city,
+    city: city === street ? undefined : city,
     street,
     houseNumber,
     queryType,
