@@ -9,6 +9,19 @@ const heatingLoad = (building: BuildingInput) => runAssessment(building).modules
 const methodB = (building: BuildingInput) => (heatingLoad(building).data as { methodBRangeKw: [number, number] }).methodBRangeKw
 const messageKeys = (building: BuildingInput) => heatingLoad(building).reportItems?.map(item => item.messageKey)
 
+describe('§14a dimming check', () => {
+  /** The heat load module passes the grid operator of the postal code to the dimming check. */
+  it('names the grid operator for the postal code', () => {
+    const building: BuildingInput = {
+      location: '82041 Oberhaching', fuelType: 'gas_kwh', annualConsumption: 15500,
+      constructionOrRenovationYear: 2005, heatedFloorAreaM2: 180,
+    }
+    expect(heatingLoad(building).reportItems).toContainEqual(
+      expect.objectContaining({ messageKey: 'grid.dimming', params: expect.objectContaining({ dso: 'Bayernwerk Netz GmbH' }) }),
+    )
+  })
+})
+
 describe('construction year from the Zensus prior', () => {
   // A fresh object per test: runAssessment writes the public data into its input.
   const unknownYear = (): BuildingInput => ({

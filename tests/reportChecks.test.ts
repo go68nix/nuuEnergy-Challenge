@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   getEnergyIntensity,
+  getGridDimmingItem,
   getHeatingLoadDisagreementItem,
   getHeatingLoadDisagreementPercent,
   getImplausibleEnergyUseItem,
@@ -49,5 +50,21 @@ describe('technician report cross-checks', () => {
     expect(getImplausibleEnergyUseItem({ ...atMinimum, annualConsumption: 1999 })).toMatchObject({ kind:'uncertain' })
     expect(getImplausibleEnergyUseItem(atMaximum)).toBeUndefined()
     expect(getImplausibleEnergyUseItem({ ...atMaximum, annualConsumption: 50001 })).toMatchObject({ kind:'uncertain' })
+  })
+
+  /** The technician gets the design-day COP that the §14a minimum power needs for the upper heat load. */
+  it('asks for a §14a dimming check with the grid operator', () => {
+    expect(getGridDimmingItem([6.82, 11.58], 'Bayernwerk Netz GmbH')).toMatchObject({
+      kind: 'verify',
+      messageKey: 'grid.dimming',
+      params: { dso: 'Bayernwerk Netz GmbH', minimumKw: 4.2, loadKw: '11.6', cop: '2.8' },
+    })
+    expect(getGridDimmingItem([6.82, 11.58])?.messageKey).toBe('grid.dimmingNoOperator')
+  })
+
+  /** Dimming cannot limit a heat pump whose whole heat load fits into the minimum power. */
+  it('skips the dimming check when the minimum power covers the heat load', () => {
+    expect(getGridDimmingItem([2.1, 4.2], 'Bayernwerk Netz GmbH')).toBeUndefined()
+    expect(getGridDimmingItem([2.1, 4.21], 'Bayernwerk Netz GmbH')).toMatchObject({ kind: 'verify' })
   })
 })

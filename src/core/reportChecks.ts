@@ -8,6 +8,28 @@ export const REPORT_CHECK_CONFIG = {
   plausibleEnergyUseKwhPerM2: [20, 500] as const,
   gasM3ToKwh: 10,
   oilLitresToKwh: 10,
+  // BNetzA §14a EnWG rule of 27 Nov 2023: power a dimmed device keeps (0.4 × connection power above 11 kW).
+  section14aMinimumKw: 4.2,
+}
+
+/**
+ * Ask the technician to check §14a EnWG dimming against the estimated heat load.
+ *
+ * During grid congestion the operator may limit a new heat pump to the §14a minimum power.
+ * The heat pump must then still cover the heat load, which needs a high enough COP on the design day.
+ *
+ * :param rangeKw: Estimated heat load range in kW.
+ * :param dsoName: Grid operator for the postal code, when the location is known.
+ * :returns: A verify item, or ``undefined`` when the minimum power covers even the upper heat load.
+ */
+export const getGridDimmingItem = (rangeKw: [number, number], dsoName?: string): ReportItem | undefined => {
+  const minimumKw = REPORT_CHECK_CONFIG.section14aMinimumKw
+  const upperKw = rangeKw[1]
+  if (upperKw <= minimumKw) return undefined
+  const params = { minimumKw, loadKw: upperKw.toFixed(1), cop: (upperKw / minimumKw).toFixed(1) }
+  return dsoName
+    ? makeReportItem('grid.dimming', 'verify', 'normal', { ...params, dso: dsoName })
+    : makeReportItem('grid.dimmingNoOperator', 'verify', 'normal', params)
 }
 
 export const getHeatingLoadDisagreementPercent = (methodAKw: number, methodBRangeKw: [number, number]) => {

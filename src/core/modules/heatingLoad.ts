@@ -7,7 +7,7 @@
 
 import type { AssessmentModule, BuildingInput } from '../types'
 import { lookupZensusPriors } from '../publicData/zensusPriors'
-import { getHeatingLoadDisagreementItem } from '../reportChecks'
+import { getGridDimmingItem, getHeatingLoadDisagreementItem } from '../reportChecks'
 import { makeReportItem } from '../reportItems'
 import { REPORT_LOCALES } from '../reportLocales'
 
@@ -125,6 +125,7 @@ export const heatingLoadModule: AssessmentModule = {
       ...(building.occupants === undefined ? [makeReportItem('heating.missingOccupants', 'missing')] : []),
       ...(yearPrior ? [makeReportItem('heating.yearEstimated', 'missing', 'high', { era: yearPrior.dominantEra })] : []),
       getHeatingLoadDisagreementItem(methodAKw, methodBRangeKw),
+      getGridDimmingItem(rangeKw, building.publicData?.grid?.dsoName),
     ].filter((item): item is NonNullable<typeof item> => item !== undefined)
 
     return {
