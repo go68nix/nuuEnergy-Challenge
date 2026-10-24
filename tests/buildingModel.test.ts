@@ -49,4 +49,9 @@ describe('building model', () => {
     expect(storeys({ height: '7.5' }, 140, 100)).toEqual({ levels: 3, heightM: 7.5, source: 'osm_height' })
     expect(storeys({}, 140, 100)).toEqual({ levels: 1, heightM: 3, source: 'heated_area' })
   })
+
+  it('reads storeys from the tile height, but not from the 5 m default for buildings without data', () => {
+    expect(storeys({}, 140, 4800, 19)).toEqual({ levels: 5, heightM: 19, source: 'osm_tiles' })
+    expect(storeys({}, 140, 100, 5)).toEqual({ levels: 1, heightM: 3, source: 'heated_area' })
+  })
 })

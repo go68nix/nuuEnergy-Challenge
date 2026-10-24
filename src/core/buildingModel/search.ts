@@ -193,7 +193,7 @@ export const searchBuilding = async (
       place: best,
       origin: best.coordinates,
       osmUrl: target.osmUrl,
-      model: buildModel(target.ring, neighbours, target.tags, answers.heatedFloorAreaM2),
+      model: buildModel(target.ring, neighbours, target.tags, answers.heatedFloorAreaM2, buildings.find(building => building.ring === target.ring)?.heightM),
       ranking,
       matchedBy,
       alternatives: matchedBy === 'unsettled' ? ranking.ranked.slice(1, 3).map(entry => entry.candidate.ring) : [],

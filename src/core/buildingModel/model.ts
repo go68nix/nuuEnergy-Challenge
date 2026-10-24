@@ -6,6 +6,9 @@ import { distanceToOutline, type Point, signedArea } from './geometry'
 
 /** Assumed storey height including the slab, used when OpenStreetMap has no height. */
 export const STOREY_HEIGHT_M = 3
+/** OpenMapTiles renders storeys at 3.66 m and gives 5 m to buildings without height data. */
+const TILE_STOREY_HEIGHT_M = 3.66
+const TILE_DEFAULT_HEIGHT_M = 5
 /** A wall counts as shared when most of it lies this close to a neighbour outline (map accuracy). */
 const SHARED_WALL_TOLERANCE_M = 0.6
 const SHARED_WALL_SAMPLE_STEP_M = 0.5
@@ -17,7 +20,7 @@ export type Wall = { index: number; a: Point; b: Point; lengthM: number; outward
 export type Neighbour = { ring: Point[]; heightM: number }
 
 /** Where the number of storeys comes from. */
-export type StoreysSource = 'osm_levels' | 'osm_height' | 'heated_area'
+export type StoreysSource = 'osm_levels' | 'osm_height' | 'osm_tiles' | 'heated_area'
 
 /** The target building in local metres. */
 export type BuildingModel = {
@@ -84,9 +87,10 @@ export const touchingNeighbours = (footprint: Point[], neighbours: Point[][]) =>
  * :param tags: OpenStreetMap tags of the building; empty when the source has none.
  * :param heatedFloorAreaM2: Heated living area from the questionnaire.
  * :param footprintAreaM2: Footprint area of the building.
+ * :param tileHeightM: Height from the OpenFreeMap tile (OSM levels or height), if any.
  * :returns: Storeys, height in metres and the source of the storey count.
  */
-export const storeys = (tags: Record<string, string>, heatedFloorAreaM2: number, footprintAreaM2: number) => {
+export const storeys = (tags: Record<string, string>, heatedFloorAreaM2: number, footprintAreaM2: number, tileHeightM?: number) => {
   const levels = Number.parseFloat(tags['building:levels'] ?? '')
   const height = Number.parseFloat(tags.height ?? '')
   if (levels > 0) {
@@ -94,6 +98,9 @@ export const storeys = (tags: Record<string, string>, heatedFloorAreaM2: number,
     return { levels: rounded, heightM: height > 0 ? height : rounded * STOREY_HEIGHT_M, source: 'osm_levels' as const }
   }
   if (height > 0) return { levels: Math.max(1, Math.round(height / STOREY_HEIGHT_M)), heightM: height, source: 'osm_height' as const }
+  if (tileHeightM && tileHeightM > TILE_DEFAULT_HEIGHT_M) {
+    return { levels: Math.round(tileHeightM / TILE_STOREY_HEIGHT_M), heightM: tileHeightM, source: 'osm_tiles' as const }
+  }
   const derived = Math.max(1, Math.round(heatedFloorAreaM2 / footprintAreaM2))
   return { levels: derived, heightM: derived * STOREY_HEIGHT_M, source: 'heated_area' as const }
 }
@@ -105,6 +112,7 @@ export const storeys = (tags: Record<string, string>, heatedFloorAreaM2: number,
  * :param neighbours: Neighbouring buildings within the search radius.
  * :param tags: OpenStreetMap tags of the target building.
  * :param heatedFloorAreaM2: Heated living area from the questionnaire.
+ * :param tileHeightM: Height of the target from the OpenFreeMap tile, if any.
  * :returns: The building model.
  */
 export const buildModel = (
@@ -112,9 +120,10 @@ export const buildModel = (
   neighbours: Neighbour[],
   tags: Record<string, string>,
   heatedFloorAreaM2: number,
+  tileHeightM?: number,
 ): BuildingModel => {
   const footprintAreaM2 = signedArea(footprint)
-  const { levels, heightM, source } = storeys(tags, heatedFloorAreaM2, footprintAreaM2)
+  const { levels, heightM, source } = storeys(tags, heatedFloorAreaM2, footprintAreaM2, tileHeightM)
   return {
     footprint,
     footprintAreaM2,
