@@ -2,6 +2,7 @@ import type { AssessmentModule, BuildingInput } from '../types'
 import { getImplausibleEnergyUseItem } from '../reportChecks'
 import { makeReportItem } from '../reportItems'
 import { REPORT_LOCALES } from '../reportLocales'
+import { assessRadiators } from './radiators'
 
 const ELECTRICITY_EUR_PER_KWH = 0.26
 const GAS_EUR_PER_KWH = 0.11
@@ -49,7 +50,8 @@ export const operatingCostModule: AssessmentModule = {
   id: 'operating_cost',
   label: 'Operating cost estimate',
   run(building, context) {
-    const jaz = getJaz(context.jaz, context.flowTemperatureClass)
+    const flowClass = context.flowTemperatureClass ?? assessRadiators(building).flowTemperatureClass
+    const jaz = getJaz(context.jaz, flowClass)
     const heatDemandKwh = getConsumptionKwh(building) * 0.88
     const heatPumpElectricityKwh = heatDemandKwh / jaz
     const estimatedHeatPumpCostEur = heatPumpElectricityKwh * ELECTRICITY_EUR_PER_KWH

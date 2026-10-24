@@ -40,4 +40,40 @@ describe('operatingCostModule', () => {
       estimatedHeatPumpCostEur: 1430,
     })
   })
+
+  it('automatically derives JAZ 4.0 for underfloor heating', () => {
+    const result = operatingCostModule.run(
+      {
+        fuelType: 'gas_kwh',
+        annualConsumption: 15000,
+        constructionOrRenovationYear: 2005,
+        heatedFloorAreaM2: 180,
+        heatingDistribution: 'underfloor',
+      },
+      {},
+    )
+
+    expect(result.data).toMatchObject({
+      jaz: 4.0,
+    })
+  })
+
+  it('automatically derives JAZ 2.8 for older uninsulated radiator heating', () => {
+    const result = operatingCostModule.run(
+      {
+        fuelType: 'heating_oil_l',
+        annualConsumption: 4000,
+        constructionOrRenovationYear: 1970,
+        heatedFloorAreaM2: 200,
+        heatingDistribution: 'radiator',
+        facadeInsulated: false,
+        roofInsulated: false,
+      },
+      {},
+    )
+
+    expect(result.data).toMatchObject({
+      jaz: 2.8,
+    })
+  })
 })
