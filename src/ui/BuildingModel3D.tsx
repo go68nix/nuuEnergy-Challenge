@@ -41,7 +41,7 @@ const dashed = (points: Point[], colour: string, y: number, closed = false) => {
   return line
 }
 
-const label = (text: string, colour: string) => {
+const label = (text: string, colour: string, scale: number) => {
   const canvas = document.createElement('canvas')
   canvas.width = canvas.height = 64
   const context = canvas.getContext('2d')!
@@ -55,11 +55,15 @@ const label = (text: string, colour: string) => {
   context.textBaseline = 'middle'
   context.fillText(text, 32, 34)
   const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(canvas), depthTest: false }))
-  sprite.scale.set(1.2, 1.2, 1)
+  sprite.scale.set(scale, scale, 1)
   return sprite
 }
 
 const buildScene = ({ model, zones, spots, alternatives }: Omit<Props, 'noWebglText' | 'onCapture'>) => {
+  const centre = centroid(model.footprint)
+  const size = Math.max(model.heightM, ...model.footprint.map(p => Math.hypot(p.x - centre.x, p.y - centre.y)))
+  // Markers grow with the building so that spots stay visible on large buildings; the unit box keeps its real size.
+  const markerScale = Math.max(1.2, size / 14)
   const scene = new THREE.Scene()
   scene.background = new THREE.Color('#ffffff')
   scene.add(new THREE.HemisphereLight('#ffffff', '#b9c5bc', 2.2))
@@ -102,18 +106,20 @@ const buildScene = ({ model, zones, spots, alternatives }: Omit<Props, 'noWebglT
     unit.position.set(spot.position.x, 0.45, -spot.position.y)
     unit.rotation.y = facing(spot.wall)
     scene.add(unit)
-    const tag = label(String(spot.rank), MODEL_COLOURS.unit)
-    tag.position.set(spot.position.x, 1.7, -spot.position.y)
+    const tag = label(String(spot.rank), MODEL_COLOURS.unit, markerScale)
+    tag.position.set(spot.position.x, 1 + markerScale, -spot.position.y)
     scene.add(tag)
+    const marker = new THREE.Mesh(new THREE.CircleGeometry(markerScale / 2, 32).rotateX(-Math.PI / 2), unitMaterial)
+    marker.position.set(spot.position.x, 0.03, -spot.position.y)
+    scene.add(marker)
     if (spot.nearestNeighbour) scene.add(dashed([spot.position, spot.nearestNeighbour.point], MODEL_COLOURS.unit, 0.06))
   }
   for (const ring of alternatives) scene.add(dashed(ring, MODEL_COLOURS.alternative, 0.04, true))
 
-  const centre = centroid(model.footprint)
-  const north = label('N', MODEL_COLOURS.edge)
-  north.position.set(centre.x, 0.6, -(centre.y + 28))
+  const north = label('N', MODEL_COLOURS.edge, markerScale)
+  north.position.set(centre.x, markerScale / 2, -(centre.y + size + 8))
   scene.add(north)
-  return { scene, target: new THREE.Vector3(centre.x, model.heightM / 2, -centre.y), size: Math.max(model.heightM, ...model.footprint.map(p => Math.hypot(p.x - centre.x, p.y - centre.y))) }
+  return { scene, target: new THREE.Vector3(centre.x, model.heightM / 2, -centre.y), size }
 }
 
 /**
