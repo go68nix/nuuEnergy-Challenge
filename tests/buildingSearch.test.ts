@@ -39,7 +39,7 @@ describe('searchBuilding', () => {
 
     const result = await searchBuilding('Teststraße 6, 81825 München (building)', { heatedFloorAreaM2: 140 })
 
-    expect(result.confident).toBe(true)
+    expect(result.matchedBy).toBe('geocoder')
     expect(result.osmUrl).toBe('https://www.openstreetmap.org/way/100')
     expect(result.trace.map(step => step.source)).toEqual(['Nominatim', 'OpenFreeMap tiles'])
     expect(sources.searchPhoton).not.toHaveBeenCalled()
@@ -57,7 +57,7 @@ describe('searchBuilding', () => {
 
     expect(result.trace.map(step => step.source)).toEqual(['Nominatim', 'OpenFreeMap tiles', 'Photon', 'Photon reverse'])
     expect(sources.loadOverpassBuildings).not.toHaveBeenCalled()
-    expect(result.confident).toBe(true)
+    expect(result.matchedBy).toBe('judges')
     expect(result.ranking.confidence).toBeCloseTo(0.8)
     expect(result.model.footprintAreaM2).toBeCloseTo(100, 0)
   })
@@ -70,7 +70,7 @@ describe('searchBuilding', () => {
     const result = await searchBuilding('Teststraße 6, 81825 München (no evidence)', { heatedFloorAreaM2: 140 })
 
     expect(result.trace.at(-1)?.outcome).toContain('no answer')
-    expect(result.confident).toBe(false)
+    expect(result.matchedBy).toBe('unsettled')
     expect(result.alternatives.length).toBeGreaterThan(0)
   })
 

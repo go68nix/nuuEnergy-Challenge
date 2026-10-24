@@ -42,6 +42,9 @@ const ARMS = [
 ] as const
 type Arm = (typeof ARMS)[number]
 
+/** Raised when the location has no house number, so no single building can be meant. */
+export class AddressNotExactError extends Error {}
+
 /** One step of the search, as shown to the technician. */
 export type SearchStep = { step: number; source: string; kind: 'harvest' | 'wider' | 'deeper'; index?: number; confidence?: number; ms: number; outcome: string }
 
@@ -52,7 +55,8 @@ export type BuildingSearchResult = {
   osmUrl?: string
   model: BuildingModel
   ranking: Ranking
-  confident: boolean
+  /** ``geocoder``: the geocoder returned this OSM building; ``judges``: the stop rule was met; else unsettled. */
+  matchedBy: 'geocoder' | 'judges' | 'unsettled'
   alternatives: Point[][]
   trace: SearchStep[]
 }
@@ -117,7 +121,7 @@ export const searchBuilding = async (
     let began = Date.now()
     const matches = await geocodeAddress(query)
     const best = matches.find(match => match.houseNumber)
-    if (!best) throw new Error('No exact address found. Enter street, house number and town to build the 3D model.')
+    if (!best) throw new AddressNotExactError('No exact address found. Enter street, house number and town to build the 3D model.')
     record('Nominatim', 'harvest', began, `${matches.length} match(es); best: ${best.label}`)
 
     const project = localProjection(best.coordinates)
@@ -184,15 +188,15 @@ export const searchBuilding = async (
     const neighbours = buildings
       .filter(building => !sameOutline(building.ring, target.ring))
       .map(building => ({ ring: building.ring, heightM: neighbourHeight(building) }))
-    const confident = settled()
+    const matchedBy = isGeocodedBuilding(target, evidence) ? 'geocoder' : settled() ? 'judges' : 'unsettled'
     return {
       address: best.label,
       origin: best.coordinates,
       osmUrl: target.osmUrl,
       model: buildModel(target.ring, neighbours, target.tags, answers.heatedFloorAreaM2),
       ranking,
-      confident,
-      alternatives: confident ? [] : ranking.ranked.slice(1, 3).map(entry => entry.candidate.ring),
+      matchedBy,
+      alternatives: matchedBy === 'unsettled' ? ranking.ranked.slice(1, 3).map(entry => entry.candidate.ring) : [],
       trace,
     }
   } finally {

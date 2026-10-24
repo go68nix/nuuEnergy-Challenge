@@ -31,6 +31,7 @@ type ReportLocale = {
     title: string; newChat: string; close: string; inputPlaceholder: string; send: string; assistantOffline: string
     typing: string; retry: string; welcome: string; suggestions: string[]; resultsSuggestions: string[]
   }
+  buildingModel: Record<string, string>
 }
 
 const messages: Record<ReportLanguage, ReportLocale> = {
@@ -94,6 +95,19 @@ const messages: Record<ReportLanguage, ReportLocale> = {
       notAvailable: 'Not available yet', estimate: 'estimate', startOver: 'Start over', technicianReport: 'View technician report',
       missingSummary: 'items still need checking on site',
     },
+    buildingModel: {
+      title: '3D building model (public data)', intro: 'Built from live OpenStreetMap data for the entered address. Drag to rotate, scroll to zoom, right-drag to move.',
+      loading: 'Searching the building in OpenStreetMap…', noLocation: 'No address was entered, so there is no 3D model.', needsExactAddress: 'No 3D model: it needs the exact address with street and house number.',
+      loadFailed: 'Could not load the building data', noWebgl: 'This browser cannot show 3D graphics (WebGL).',
+      legendHeating: 'Possible heating surfaces (radiator zones), not surveyed', legendFloor: 'Possible underfloor heating, not surveyed', legendUnit: 'Possible outdoor unit spots, #1 is the quietest for neighbours', legendNeighbour: 'Neighbouring buildings', legendAlternative: 'Other possible buildings (match uncertain)',
+      building: 'Building', tileOutline: 'outline from OpenFreeMap tiles', footprint: 'Footprint', storeys: 'Storeys', osm_levels: 'OSM building:levels', osm_height: 'OSM height', heated_area: 'derived: heated area ÷ footprint', walls: 'Free / shared exterior walls',
+      match: 'Building match', matchIdentity: 'settled: the geocoder returned this OSM building for the address', matchJudges: 'settled: head-to-head confidence {{confidence}} from the judges', matchUncertain: 'uncertain (confidence {{confidence}}): check the building on site',
+      heatingNotGiven: 'Heating type not given: radiator walls are shown.',
+      spotsTitle: 'Outdoor unit spots', facing: 'Wall faces', neighbour: 'Nearest neighbour', max35: 'Max. sound power for 35 dB(A) at night', max40: 'for 40 dB(A)', noNeighbour: 'none within 80 m',
+      spotNote: 'Free-field estimate (Q = 4, unit in front of one wall) against the TA Lärm night limits at the nearest neighbouring building: 35 dB(A) in purely residential, 40 dB(A) in general residential areas. Barriers, reflections and tonality are not included. Compare with the sound power on the data sheet of the planned unit.',
+      searchTitle: 'How the building was found (SIFT ranking and AB-MCTS steps)', candidate: 'Candidate', strength: 'Bradley-Terry strength', votesWon: 'Judge votes won', step: 'Step', source: 'Source', kind: 'Kind', index: 'UCB / s', confidence: 'Confidence', duration: 'Time', outcome: 'Result',
+      compass: 'N,NE,E,SE,S,SW,W,NW', attribution: 'Map data © OpenStreetMap contributors (ODbL), via Nominatim, OpenFreeMap and Photon.',
+    },
     chat: { title: 'Assessment helper', newChat: 'New chat', close: 'Close', inputPlaceholder: 'Ask about your assessment…', send: 'Send', assistantOffline: 'Assistant offline', typing: 'Thinking…', retry: 'Try again', welcome: 'Ask me about your questionnaire or heat-pump result. I will use only the information provided here.', suggestions: ['What should I prepare for the technician?', 'What does a heat pump do?'], resultsSuggestions: ['Why is my result yellow?', 'What does the heating load mean?'] },
   },
   de: {
@@ -155,6 +169,19 @@ const messages: Record<ReportLanguage, ReportLocale> = {
       },
       notAvailable: 'Noch nicht verfügbar', estimate: 'Schätzung', startOver: 'Neu starten', technicianReport: 'Technikerbericht ansehen',
       missingSummary: 'Punkte müssen noch vor Ort geprüft werden',
+    },
+    buildingModel: {
+      title: '3D-Gebäudemodell (öffentliche Daten)', intro: 'Aus aktuellen OpenStreetMap-Daten für die eingegebene Adresse. Ziehen zum Drehen, Mausrad zum Zoomen, rechte Maustaste zum Verschieben.',
+      loading: 'Gebäude wird in OpenStreetMap gesucht…', noLocation: 'Keine Adresse angegeben, daher kein 3D-Modell.', needsExactAddress: 'Kein 3D-Modell: Dafür braucht es die genaue Adresse mit Straße und Hausnummer.',
+      loadFailed: 'Gebäudedaten konnten nicht geladen werden', noWebgl: 'Dieser Browser kann keine 3D-Grafik (WebGL) anzeigen.',
+      legendHeating: 'Mögliche Heizflächen (Heizkörperzonen), nicht vermessen', legendFloor: 'Mögliche Fußbodenheizung, nicht vermessen', legendUnit: 'Mögliche Standorte der Außeneinheit, #1 ist für Nachbarn am leisesten', legendNeighbour: 'Nachbargebäude', legendAlternative: 'Andere mögliche Gebäude (Zuordnung unsicher)',
+      building: 'Gebäude', tileOutline: 'Umriss aus OpenFreeMap-Kacheln', footprint: 'Grundfläche', storeys: 'Geschosse', osm_levels: 'OSM building:levels', osm_height: 'OSM-Höhe', heated_area: 'abgeleitet: Wohnfläche ÷ Grundfläche', walls: 'Freie / angebaute Außenwände',
+      match: 'Gebäudezuordnung', matchIdentity: 'gesichert: Der Geocoder hat genau dieses OSM-Gebäude für die Adresse geliefert', matchJudges: 'gesichert: Konfidenz {{confidence}} im direkten Vergleich der Richter', matchUncertain: 'unsicher (Konfidenz {{confidence}}): Gebäude vor Ort prüfen',
+      heatingNotGiven: 'Heizungsart nicht angegeben: Heizkörperwände werden gezeigt.',
+      spotsTitle: 'Standorte der Außeneinheit', facing: 'Wand zeigt nach', neighbour: 'Nächstes Nachbargebäude', max35: 'Max. Schallleistung für 35 dB(A) nachts', max40: 'für 40 dB(A)', noNeighbour: 'keins im Umkreis von 80 m',
+      spotNote: 'Freifeld-Abschätzung (Q = 4, Gerät vor einer Wand) gegen die Nachtwerte der TA Lärm am nächsten Nachbargebäude: 35 dB(A) im reinen, 40 dB(A) im allgemeinen Wohngebiet. Hindernisse, Reflexionen und Tonhaltigkeit sind nicht berücksichtigt. Mit der Schallleistung aus dem Datenblatt des geplanten Geräts vergleichen.',
+      searchTitle: 'Wie das Gebäude gefunden wurde (SIFT-Ranking und AB-MCTS-Schritte)', candidate: 'Kandidat', strength: 'Bradley-Terry-Stärke', votesWon: 'Gewonnene Richterstimmen', step: 'Schritt', source: 'Quelle', kind: 'Art', index: 'UCB / s', confidence: 'Konfidenz', duration: 'Dauer', outcome: 'Ergebnis',
+      compass: 'N,NO,O,SO,S,SW,W,NW', attribution: 'Kartendaten © OpenStreetMap-Mitwirkende (ODbL), über Nominatim, OpenFreeMap und Photon.',
     },
     chat: { title: 'Assistent für Ihre Einschätzung', newChat: 'Neuer Chat', close: 'Schließen', inputPlaceholder: 'Frage zu Ihrer Einschätzung…', send: 'Senden', assistantOffline: 'Assistent nicht verfügbar', typing: 'Denkt nach…', retry: 'Erneut versuchen', welcome: 'Fragen Sie mich zu Ihrem Fragebogen oder Wärmepumpenergebnis. Ich nutze nur die hier angegebenen Informationen.', suggestions: ['Was soll ich für den Techniker vorbereiten?', 'Was macht eine Wärmepumpe?'], resultsSuggestions: ['Warum ist mein Ergebnis gelb?', 'Was bedeutet die Heizlast?'] },
   },

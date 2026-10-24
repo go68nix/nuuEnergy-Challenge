@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import type { AssessmentResult } from '../core/types'
 import { buildReport, exportReportAsText } from '../core/report'
 import { REPORT_LOCALES, type ReportLanguage } from '../core/reportLocales'
+import { BuildingModelSection } from './BuildingModelSection'
 
 type Props = { assessment: AssessmentResult; onBack: () => void }
 
@@ -33,6 +34,7 @@ export const TechnicianReportPage = ({ assessment, onBack }: Props) => {
       <ul className="summary-reasons">{report.summary.reasons.map(reason => <li key={reason}>{reason}</li>)}</ul><p className="preliminary-note">{report.summary.preliminaryNote}</p>
     </section>
     <section className="report-section"><h2>{locale.sections.building}</h2><div className="report-data-grid">{report.buildingData.map(entry=><article className="report-data-item" key={entry.key}><span>{entry.label}</span><strong>{entry.value}</strong><small>{locale.labels.source}: {locale.labels[entry.source]}</small></article>)}</div></section>
+    <BuildingModelSection building={assessment.building} language={language} />
     <section className="report-section"><h2>{locale.sections.findings}</h2><div className="report-findings">{report.findings.map(finding=><article className="report-finding" key={finding.id}><h3>{finding.title}</h3><ul>{finding.lines.map(line=><li key={line}>{line}</li>)}</ul></article>)}</div></section>
     <section className="report-section"><h2>{locale.sections.missing}</h2><div className="report-flag-list">{renderItems(report.missingInformation)}</div></section>
     <section className="report-section"><h2>{locale.sections.grey}</h2><div className="report-flag-list">{renderItems(report.greyAreas)}</div></section>
