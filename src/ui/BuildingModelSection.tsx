@@ -54,7 +54,7 @@ export const BuildingModelSection = ({ building, language }: Props) => {
     if (!location) return <p className="report-empty">{text.noLocation}</p>
     if (search.status === 'loading') return <p className="report-empty">{text.loading}</p>
     if (search.status === 'failed') return <p className="report-empty">{search.notExact ? text.needsExactAddress : `${text.loadFailed}: ${search.message}`}</p>
-    const { model, ranking, trace, alternatives, matchedBy, osmUrl, address } = search.result
+    const { model, ranking, trace, alternatives, matchedBy, osmUrl, place } = search.result
     const compass = text.compass.split(',')
     const direction = (deg: number) => compass[Math.round(deg / 45) % 8]
     const confidence = ranking.confidence === undefined ? '–' : ranking.confidence.toFixed(2)
@@ -76,7 +76,7 @@ export const BuildingModelSection = ({ building, language }: Props) => {
       <div className="model-legend">{legend.map(([colour, label]) => <span key={label}><i className="model-swatch" style={{ background: colour }} />{label}</span>)}</div>
       {!building.heatingDistribution && <p className="model-note">{text.heatingNotGiven}</p>}
       <div className="report-data-grid">
-        <article className="report-data-item"><span>{text.building}</span><strong>{address}</strong><small>{osmUrl ? <a href={osmUrl} target="_blank" rel="noreferrer">{osmUrl.replace('https://www.openstreetmap.org/', 'OSM ')}</a> : text.tileOutline}</small></article>
+        <article className="report-data-item"><span>{text.building}</span><strong>{place.label}</strong><small>{osmUrl ? <a href={osmUrl} target="_blank" rel="noreferrer">{osmUrl.replace('https://www.openstreetmap.org/', 'OSM ')}</a> : text.tileOutline}</small></article>
         <article className="report-data-item"><span>{text.footprint}</span><strong>{Math.round(model.footprintAreaM2)} m²</strong></article>
         <article className="report-data-item"><span>{text.storeys}</span><strong>{model.levels} · {model.heightM.toFixed(1)} m</strong><small>{text[model.levelsSource]}</small></article>
         <article className="report-data-item"><span>{text.walls}</span><strong>{freeWalls} / {model.walls.length - freeWalls}</strong></article>

@@ -8,7 +8,7 @@
  * The stop rule and the time budget are fixed before the search starts.
  */
 
-import { geocodeAddress, type LatLon } from '../publicData/geocode'
+import { type GeocodedAddress, geocodeAddress, type LatLon } from '../publicData/geocode'
 import type { BuildingInput } from '../types'
 import { centroid, distanceToFootprint, localProjection, normaliseRing, type Point, sameOutline, signedArea, toLatLon } from './geometry'
 import { type BuildingModel, buildModel, STOREY_HEIGHT_M, touchingNeighbours } from './model'
@@ -50,7 +50,7 @@ export type SearchStep = { step: number; source: string; kind: 'harvest' | 'wide
 
 /** The result of a building search. */
 export type BuildingSearchResult = {
-  address: string
+  place: GeocodedAddress
   origin: LatLon
   osmUrl?: string
   model: BuildingModel
@@ -190,7 +190,7 @@ export const searchBuilding = async (
       .map(building => ({ ring: building.ring, heightM: neighbourHeight(building) }))
     const matchedBy = isGeocodedBuilding(target, evidence) ? 'geocoder' : settled() ? 'judges' : 'unsettled'
     return {
-      address: best.label,
+      place: best,
       origin: best.coordinates,
       osmUrl: target.osmUrl,
       model: buildModel(target.ring, neighbours, target.tags, answers.heatedFloorAreaM2),
