@@ -1,7 +1,7 @@
 /**
  * Public data enrichment module for the core assessment pipeline.
  *
- * Integrates open cadastre, climate, grid operator, and subsidy information,
+ * Integrates the geocoded place, climate, grid operator, and subsidy information,
  * or provides transparent national defaults when location entry is skipped by the user.
  */
 
@@ -41,7 +41,7 @@ export const publicDataModule: AssessmentModule = {
     }
 
     const notes: string[] = [
-      `Location: ${pd.formattedAddress ?? pd.city ?? pd.postalCode ?? 'Germany'}`,
+      `Location: ${pd.formattedAddress ?? pd.query}`,
       `DIN EN 12831 Design Outdoor Temperature: ${pd.climate?.designOutdoorTempC ?? -12}°C (${pd.climate?.matchedCity ?? 'Reference'})`,
       `Grid Operator: ${pd.grid?.dsoName ?? 'Responsible DSO'} (§14a EnWG connection guaranteed, reduced grid fee eligible)`,
     ]
@@ -73,8 +73,6 @@ export const publicDataModule: AssessmentModule = {
         zensus: pd.zensus,
         subsidies: pd.subsidies,
         crossChecks: pd.crossChecks,
-        siftWinner: pd.siftTournament?.winnerLabel,
-        siftProbability: pd.siftTournament?.winProbability,
       },
       notes,
     }

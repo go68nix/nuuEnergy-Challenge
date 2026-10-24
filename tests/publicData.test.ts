@@ -1,9 +1,8 @@
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { lookupDesignOutdoorTemperature } from '../src/core/publicData/din12831'
 import { lookupDsoByPlz } from '../src/core/publicData/dsoDirectory'
 import { lookupZensusPriors } from '../src/core/publicData/zensusPriors'
 import { calculateSubsidies } from '../src/core/publicData/subsidies'
-import { parseLocationInput, runSiftTournament, runAbMctsArbitration } from '../src/core/publicData/siftMctsSearch'
 import { lookupPublicData } from '../src/core/publicData/service'
 import { publicDataModule } from '../src/core/modules/publicData'
 
@@ -89,37 +88,14 @@ describe('KfW 458 and Municipal Subsidies', () => {
   })
 })
 
-describe('Non-LLM SIFT Tournament and AB-MCTS Arbitration', () => {
-  it('ranks cadastre candidates head-to-head using Bradley-Terry preference', () => {
-    const query = parseLocationInput('Sendlinger Str. 10, 80331 München')
-    expect(query.postalCode).toBe('80331')
-    expect(query.houseNumber).toBe('10')
-
-    const candidates = [
-      { id: 'c1', label: 'Sendlinger Str. 10, 80331', postalCode: '80331', street: 'Sendlinger Str.', houseNumber: '10', footprintM2: 110 },
-      { id: 'c2', label: '80331 München Quartier', postalCode: '80331', footprintM2: 50 },
-    ]
-
-    const result = runSiftTournament(query, candidates)
-    expect(result.winnerLabel).toContain('Sendlinger Str. 10')
-    expect(result.winProbability).toBeGreaterThan(0.5)
-  })
-
-  it('runs AB-MCTS arbitration across information branches', () => {
-    let executed = 0
-    const tasks = [
-      { name: 'b1', depth: 1, priorWeight: 0.9, execute: () => { executed++; return { success: true, evidenceQuality: 1.0 } } },
-      { name: 'b2', depth: 2, priorWeight: 0.8, execute: () => { executed++; return { success: true, evidenceQuality: 0.9 } } },
-    ]
-    const branches = runAbMctsArbitration(tasks)
-    expect(executed).toBe(2)
-    expect(branches.length).toBe(2)
-    expect(branches[0].ucbScore).toBeGreaterThan(0)
-  })
-})
-
 describe('Integrated Public Data Service & Module', () => {
+  afterEach(() => vi.unstubAllGlobals())
+
   it('synthesizes multi-source public data and performs cross-checks', async () => {
+    vi.stubGlobal('fetch', vi.fn(async () => Response.json([{
+      osm_type: 'relation', osm_id: 1, lat: '48.137', lon: '11.575', display_name: '80331, München, Bayern, Deutschland',
+      category: 'boundary', address: { postcode: '80331', city: 'München' }, extratags: {},
+    }])))
     const pd = await lookupPublicData('80331 München', {
       heatedFloorAreaM2: 150,
       buildingType: 'single_two_family',
@@ -169,7 +145,7 @@ describe('Integrated Public Data Service & Module', () => {
 
     expect(modResult.status).toBe('ok')
     expect(building.publicData).toBeDefined()
-    expect(building.publicData?.city).toContain('München')
+    expect(building.publicData?.postalCode).toBe('80331')
     expect(building.designOutdoorTempC).toBe(-11.1)
     expect(modResult.notes?.some((n) => n.includes('-11.1°C'))).toBe(true)
   })
