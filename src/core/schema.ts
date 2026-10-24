@@ -21,6 +21,10 @@ export const buildingSchema = z.object({
   heatingSystemAge: z.enum(['0_9', '10_19', '20_29', '30_plus', 'unknown']).optional(),
   replacementTiming: z.enum(['immediately', '1_3_months', '3_6_months', 'over_6_months', 'not_planned']).optional(),
   winterHeatedShare: z.enum(['half', 'third', 'quarter', 'other']).optional(),
+  pipe_system: z.enum(['two-pipe', 'single-pipe', 'unknown']).optional(),
+  pipeSystemSource: z.enum(['user', 'estimated', 'unknown']).optional(),
+  pipeSystemEvidence: z.array(z.string()).optional(),
+  pipeSystemConfidence: z.coerce.number().min(0).max(1).optional(),
 })
 
 export type BuildingSchema = z.infer<typeof buildingSchema>

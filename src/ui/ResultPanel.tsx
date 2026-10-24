@@ -57,6 +57,7 @@ export const ResultPanel = ({ result }: ResultPanelProps) => {
                 </ul>
               )}
               {moduleResult.data !== undefined && <pre>{renderData(moduleResult.data)}</pre>}
+              {moduleResult.id === 'technician_checklist' && result.photos && result.photos.length > 0 && <section className="photo-report"><h3>Heater photos</h3><div className="photo-list">{result.photos.map(photo=><article className="photo-check" key={photo.id}><img className={photo.highlightedUrl?'photo-highlighted':''} src={photo.kind==='not-heater'?photo.url:photo.highlightedUrl??photo.url} alt="Uploaded heater connection"/><div className="photo-detection"><strong>{photo.label}</strong><span>{Math.round(photo.confidence*100)}% confidence</span>{photo.evidence.map(item=><small key={item}>{item}</small>)}</div></article>)}</div></section>}
             </article>
           ))}
         </div>

@@ -18,6 +18,23 @@ export type BuildingInput = {
   heatingSystemAge?: '0_9' | '10_19' | '20_29' | '30_plus' | 'unknown'
   replacementTiming?: 'immediately' | '1_3_months' | '3_6_months' | 'over_6_months' | 'not_planned'
   winterHeatedShare?: 'half' | 'third' | 'quarter' | 'other'
+  pipe_system?: 'two-pipe' | 'single-pipe' | 'unknown'
+  pipeSystemSource?: 'user' | 'estimated' | 'unknown'
+  pipeSystemEvidence?: string[]
+  pipeSystemConfidence?: number
+}
+
+export type HeaterPhoto = {
+  id: string
+  name: string
+  url: string
+  highlightedUrl?: string
+  kind: 'pipe-unclear' | 'two-pipe' | 'single-pipe' | 'not-heater'
+  label: string
+  confidence: number
+  evidence: string[]
+  highlightStatus: 'loading' | 'ready' | 'failed'
+  highlightMessage?: string
 }
 
 export type ModuleResult = {
@@ -31,6 +48,7 @@ export type ModuleResult = {
 export type AssessmentResult = {
   building: BuildingInput
   modules: ModuleResult[]
+  photos?: HeaterPhoto[]
 }
 
 export type AssessmentContext = {

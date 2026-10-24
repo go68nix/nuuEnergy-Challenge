@@ -3,6 +3,7 @@ import { operatingCostModule } from './modules/operatingCost'
 import { radiatorsModule } from './modules/radiators'
 import { technicianChecklistModule } from './modules/technicianChecklist'
 import { trafficLightModule } from './modules/trafficLight'
+import { pipeTypeModule } from './modules/pipeType'
 import type { AssessmentContext, AssessmentModule, AssessmentResult, BuildingInput } from './types'
 
 export const assessmentModules: AssessmentModule[] = [
@@ -10,6 +11,7 @@ export const assessmentModules: AssessmentModule[] = [
   operatingCostModule,
   radiatorsModule,
   technicianChecklistModule,
+  pipeTypeModule,
   trafficLightModule,
 ]
 
