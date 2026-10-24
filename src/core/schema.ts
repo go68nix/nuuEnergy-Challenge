@@ -1,6 +1,9 @@
 import { z } from 'zod'
 
 export const buildingSchema = z.object({
+  location: z.string().optional(),
+  designOutdoorTempC: z.coerce.number().optional(),
+  publicData: z.any().optional(),
   fuelType: z.enum(['gas_m3', 'gas_kwh', 'heating_oil_l']),
   annualConsumption: z.coerce.number().positive('Annual consumption must be greater than 0'),
   occupants: z.coerce

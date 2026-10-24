@@ -4,9 +4,11 @@ import { radiatorsModule } from './modules/radiators'
 import { technicianChecklistModule } from './modules/technicianChecklist'
 import { trafficLightModule } from './modules/trafficLight'
 import { pipeTypeModule } from './modules/pipeType'
+import { publicDataModule } from './modules/publicData'
 import type { AssessmentContext, AssessmentModule, AssessmentResult, BuildingInput } from './types'
 
 export const assessmentModules: AssessmentModule[] = [
+  publicDataModule,
   heatingLoadModule,
   operatingCostModule,
   radiatorsModule,

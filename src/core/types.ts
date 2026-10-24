@@ -1,3 +1,5 @@
+import type { PublicDataResult } from './publicData/types'
+
 export type FuelType = 'gas_m3' | 'gas_kwh' | 'heating_oil_l'
 
 export type TrafficLight = 'green' | 'yellow' | 'red'
@@ -16,6 +18,9 @@ export type ReportItem = {
 }
 
 export type BuildingInput = {
+  location?: string
+  publicData?: PublicDataResult
+  designOutdoorTempC?: number
   fuelType: FuelType
   annualConsumption: number
   occupants?: number
